@@ -1,10 +1,20 @@
 // cloud-functions/mirasuit-image-api/index.js
-// M-11 Sprint 3 — Style image generation via OpenAI DALL-E / Replicate
+// M-11 Sprint 3 — Style image generation via OpenAI DALL-E
 const axios = require('axios');
 
 exports.main = async (event, context) => {
   const { action, mbti, styleName } = event;
   const apiKey = process.env.OPENAI_API_KEY;
+
+  // Health check — always available, no apiKey required
+  if (action === 'health') {
+    return {
+      status: 'ok',
+      service: 'mirasuit-image-api',
+      model: 'dall-e-3',
+      apiKeyConfigured: !!apiKey,
+    };
+  }
 
   if (!apiKey) {
     return { success: false, error: 'OPENAI_API_KEY not configured' };

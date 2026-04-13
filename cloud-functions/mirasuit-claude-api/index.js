@@ -6,6 +6,16 @@ exports.main = async (event, context) => {
   const { action, profile, answers } = event;
   const apiKey = process.env.ANTHROPIC_API_KEY;
 
+  // Health check — always available, no apiKey required
+  if (action === 'health') {
+    return {
+      status: 'ok',
+      service: 'mirasuit-claude-api',
+      model: 'claude-3-5-haiku-20241022',
+      apiKeyConfigured: !!apiKey,
+    };
+  }
+
   if (!apiKey) {
     return { success: false, error: 'ANTHROPIC_API_KEY not configured' };
   }
