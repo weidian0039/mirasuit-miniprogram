@@ -1,0 +1,5 @@
+<!-- app.wxml — MIRASUIT App Root Template -->
+<!-- WeChat Mini Program renders page content into this container -->
+<!-- Do not add custom content here — WeChat framework handles page injection -->
+<view class="page">
+</view>
