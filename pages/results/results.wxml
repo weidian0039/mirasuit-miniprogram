@@ -1,0 +1,77 @@
+<view class="results-page">
+  <!-- No Result State -->
+  <view class="no-result" wx:if="{{!hasResult}}">
+    <text class="no-result-icon">👔</text>
+    <text class="no-result-title">尚未完成风格测试</text>
+    <text class="no-result-desc">回答8道问题，发现你的专属穿衣风格</text>
+    <button class="btn-primary" bindtap="startTest">开始测试</button>
+  </view>
+
+  <!-- Result Content -->
+  <view wx:if="{{hasResult}}">
+    <!-- Style Card Hero -->
+    <view class="style-hero" style="background: linear-gradient(135deg, {{styleColor}} 0%, {{styleColorLight}} 100%);">
+      <view class="hero-content">
+        <view class="mbti-display">
+          <text class="mbti-letter" wx:for="{{mbtiArray}}" wx:key="index">{{item}}</text>
+        </view>
+        <text class="style-name">{{styleName}}</text>
+        <text class="style-desc">{{styleDesc}}</text>
+      </view>
+    </view>
+
+    <!-- Style Details -->
+    <view class="card detail-card">
+      <text class="section-title">你的风格解读</text>
+      <text class="detail-text">{{detailText}}</text>
+    </view>
+
+    <!-- Recommendations -->
+    <view class="card rec-card">
+      <text class="section-title">穿搭建议</text>
+      <view class="rec-list">
+        <view class="rec-item" wx:for="{{recommendations}}" wx:key="index">
+          <view class="rec-icon">{{item.icon}}</view>
+          <view class="rec-content">
+            <text class="rec-title">{{item.title}}</text>
+            <text class="rec-desc">{{item.desc}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Color Palette -->
+    <view class="card palette-card">
+      <text class="section-title">推荐色系</text>
+      <view class="color-palette">
+        <view
+          class="color-swatch"
+          wx:for="{{colorPalette}}"
+          wx:key="index"
+          style="background: {{item.hex}};"
+        >
+          <text class="color-name">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- Actions -->
+    <view class="card actions-card">
+      <button class="btn-primary" bindtap="generateStyleImage">
+        {{isGeneratingImage ? '生成中...' : '生成风格卡'}}
+      </button>
+      <button class="btn-secondary" bindtap="goToShare">
+        生成分享图
+      </button>
+      <button class="btn-secondary" bindtap="shareResult">
+        分享给好友
+      </button>
+    </view>
+
+    <!-- Style Image Preview -->
+    <view class="card image-preview" wx:if="{{styleImagePath}}">
+      <image src="{{styleImagePath}}" mode="aspectFit" class="style-image"></image>
+      <button class="btn-secondary" bindtap="saveStyleImage">保存到相册</button>
+    </view>
+  </view>
+</view>

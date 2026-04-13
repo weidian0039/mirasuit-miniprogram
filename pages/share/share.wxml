@@ -1,0 +1,61 @@
+<view class="share-page">
+  <!-- Template Selection -->
+  <view class="card template-card" wx:if="{{!isGenerating}}">
+    <text class="section-title">选择分享模板</text>
+
+    <view class="template-list">
+      <view
+        class="template-item {{selectedTemplate === index ? 'selected' : ''}}"
+        wx:for="{{templates}}"
+        wx:key="index"
+        bindtap="selectTemplate"
+        data-index="{{index}}"
+      >
+        <view class="template-preview template-{{item.name}}">
+          <text class="preview-mbti">{{mbti}}</text>
+          <text class="preview-style">{{styleName}}</text>
+        </view>
+        <text class="template-name">{{item.label}}</text>
+      </view>
+    </view>
+
+    <button class="btn-primary generate-btn" bindtap="generateShareCard">
+      生成分享图
+    </button>
+  </view>
+
+  <!-- Generating -->
+  <view class="card generating-card" wx:if="{{isGenerating}}">
+    <view class="loading-dots">
+      <view class="loading-dot"></view>
+      <view class="loading-dot"></view>
+      <view class="loading-dot"></view>
+    </view>
+    <text class="generating-text">正在生成{{templates[selectedTemplate].label}}风格...</text>
+  </view>
+
+  <!-- Preview + Actions -->
+  <view class="card preview-card" wx:if="{{shareImagePath}}">
+    <image src="{{shareImagePath}}" mode="aspectFit" class="share-preview"></image>
+
+    <view class="preview-actions">
+      <button class="btn-primary" bindtap="saveShareCard">保存图片</button>
+      <button class="btn-secondary" bindtap="shareToWeChat">分享到微信</button>
+    </view>
+  </view>
+
+  <!-- Deep Link -->
+  <view class="card deeplink-card" wx:if="{{shareImagePath}}">
+    <text class="section-title">分享链接</text>
+    <text class="deeplink-text">{{shareLink}}</text>
+    <button class="btn-secondary" bindtap="copyShareLink">复制链接</button>
+  </view>
+
+  <!-- Hidden Canvas for rendering -->
+  <canvas
+    type="2d"
+    id="shareCanvas"
+    canvas-id="shareCanvas"
+    style="position:absolute;left:-9999px;width:750px;height:1334px;"
+  ></canvas>
+</view>

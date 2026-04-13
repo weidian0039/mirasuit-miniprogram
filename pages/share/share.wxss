@@ -1,0 +1,146 @@
+.share-page {
+  min-height: 100vh;
+  background: var(--brand-bg);
+  padding: 24rpx;
+  padding-bottom: 40rpx;
+}
+
+.section-title {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 500;
+  color: var(--brand-black);
+  letter-spacing: 2rpx;
+  margin-bottom: 32rpx;
+  text-transform: uppercase;
+}
+
+/* Templates */
+.template-list {
+  display: flex;
+  gap: 24rpx;
+  margin-bottom: 32rpx;
+  overflow-x: auto;
+  padding-bottom: 8rpx;
+}
+
+.template-item {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.template-preview {
+  width: 200rpx;
+  height: 280rpx;
+  border-radius: 16rpx;
+  border: 2rpx solid transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  transition: all 0.2s;
+}
+
+.template-item.selected .template-preview {
+  border-color: var(--brand-black);
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.15);
+}
+
+.template-classic {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+}
+
+.template-minimal {
+  background: #ffffff;
+}
+
+.template-bold {
+  background: linear-gradient(135deg, #000000 0%, #FF6B35 100%);
+}
+
+.preview-mbti {
+  font-size: 48rpx;
+  font-weight: 200;
+  letter-spacing: 8rpx;
+}
+
+.template-classic .preview-mbti,
+.template-bold .preview-mbti {
+  color: rgba(255,255,255,0.9);
+}
+
+.template-minimal .preview-mbti {
+  color: #1a1a1a;
+}
+
+.preview-style {
+  font-size: 20rpx;
+  font-weight: 300;
+}
+
+.template-classic .preview-style,
+.template-bold .preview-style {
+  color: rgba(255,255,255,0.6);
+}
+
+.template-minimal .preview-style {
+  color: #999;
+}
+
+.template-name {
+  font-size: 22rpx;
+  color: var(--brand-gray);
+}
+
+.generate-btn {
+  margin-top: 8rpx;
+}
+
+/* Generating */
+.generating-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24rpx;
+  padding: 80rpx 32rpx;
+}
+
+.generating-text {
+  font-size: 28rpx;
+  color: var(--brand-gray);
+  font-weight: 300;
+}
+
+/* Preview */
+.share-preview {
+  width: 100%;
+  border-radius: 16rpx;
+  margin-bottom: 24rpx;
+}
+
+.preview-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+/* Deep Link */
+.deeplink-card {
+  margin-top: 24rpx;
+}
+
+.deeplink-text {
+  display: block;
+  font-size: 22rpx;
+  color: var(--brand-gray);
+  word-break: break-all;
+  padding: 16rpx;
+  background: var(--brand-bg);
+  border-radius: 8rpx;
+  margin-bottom: 16rpx;
+  font-family: monospace;
+}

@@ -1,0 +1,70 @@
+<view class="questionnaire-page">
+  <!-- Progress Bar -->
+  <view class="progress-section">
+    <view class="progress-bar">
+      <view class="progress-fill" style="width: {{progressPercent}}%"></view>
+    </view>
+    <view class="progress-text">
+      <text>{{currentIndex + 1}} / {{questions.length}}</text>
+    </view>
+  </view>
+
+  <!-- Question Card -->
+  <view class="card question-card" wx:if="{{!isLoading && !isComplete}}">
+    <text class="question-category">{{currentQuestion.category}}</text>
+    <text class="question-text">{{currentQuestion.text}}</text>
+
+    <!-- Options -->
+    <view class="options-list">
+      <view
+        wx:for="{{currentQuestion.options}}"
+        wx:key="index"
+        class="option-chip {{selectedIndex === index ? 'selected' : ''}}"
+        bindtap="selectOption"
+        data-index="{{index}}"
+      >
+        <text class="option-letter">{{item.letter}}</text>
+        <text class="option-text">{{item.text}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Loading State -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading-dots">
+      <view class="loading-dot"></view>
+      <view class="loading-dot"></view>
+      <view class="loading-dot"></view>
+    </view>
+    <text class="loading-text">分析你的风格DNA...</text>
+  </view>
+
+  <!-- Complete + Generating -->
+  <view class="card complete-card" wx:if="{{isComplete && isGenerating}}">
+    <view class="loading-dots">
+      <view class="loading-dot"></view>
+      <view class="loading-dot"></view>
+      <view class="loading-dot"></view>
+    </view>
+    <text class="complete-title">正在生成你的专属风格报告</text>
+    <text class="complete-desc">基于{{answers.length}}道题答案，AI正在分析...</text>
+  </view>
+
+  <!-- Navigation -->
+  <view class="nav-section safe-bottom" wx:if="{{!isLoading && !isComplete}}">
+    <button
+      class="btn-secondary nav-btn-back"
+      wx:if="{{currentIndex > 0}}"
+      bindtap="prevQuestion"
+    >
+      上一步
+    </button>
+    <button
+      class="btn-primary nav-btn-next"
+      bindtap="nextQuestion"
+      disabled="{{selectedIndex === -1}}"
+    >
+      {{currentIndex === questions.length - 1 ? '生成报告' : '下一题'}}
+    </button>
+  </view>
+</view>

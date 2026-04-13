@@ -1,0 +1,43 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/questionnaire/questionnaire",
+    "pages/results/results",
+    "pages/share/share"
+  ],
+  "window": {
+    "navigationBarTitleText": "MIRASUIT",
+    "navigationBarBackgroundColor": "#1a1a1a",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#fafafa",
+    "backgroundTextStyle": "dark",
+    "enablePullDownRefresh": false
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#1a1a1a",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页",
+        "iconPath": "assets/icon-home.png",
+        "selectedIconPath": "assets/icon-home-active.png"
+      },
+      {
+        "pagePath": "pages/results/results",
+        "text": "我的风格",
+        "iconPath": "assets/icon-profile.png",
+        "selectedIconPath": "assets/icon-profile-active.png"
+      }
+    ]
+  },
+  "networkTimeout": {
+    "request": 30000,
+    "connectSocket": 30000,
+    "uploadFile": 30000,
+    "downloadFile": 30000
+  },
+  "debug": false
+}

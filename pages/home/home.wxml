@@ -1,0 +1,67 @@
+<view class="home-page">
+  <!-- Hero Section -->
+  <view class="hero">
+    <view class="brand-mark">
+      <text class="brand-name">MIRASUIT</text>
+      <text class="brand-tagline">YOUR STYLE IDENTITY</text>
+    </view>
+  </view>
+
+  <!-- Main Card -->
+  <view class="card hero-card">
+    <text class="card-title">发现你的专属穿衣风格</text>
+    <text class="card-desc">
+      基于MBTI人格测试与穿衣偏好，AI为你精准推荐最适合的穿搭风格。\n无需注册，数据仅存储于本地设备。
+    </text>
+
+    <!-- MBTI Badge if already taken -->
+    <view class="mbti-badge" wx:if="{{hasResult}}">
+      <text>{{styleResult.mbti}}</text>
+      <text class="mbti-label">· {{styleResult.styleName}}</text>
+    </view>
+
+    <!-- CTA Button -->
+    <button class="btn-primary start-btn" bindtap="startJourney">
+      {{hasResult ? '重新测试' : '开始风格测试'}}
+    </button>
+
+    <!-- Share Result Button if exists -->
+    <button class="btn-secondary" wx:if="{{hasResult}}" bindtap="viewResult">
+      查看我的风格报告
+    </button>
+  </view>
+
+  <!-- How It Works -->
+  <view class="card steps-card">
+    <text class="section-title">如何运作</text>
+
+    <view class="step-item">
+      <view class="step-num">1</view>
+      <view class="step-content">
+        <text class="step-title">回答8道问题</text>
+        <text class="step-desc">关于生活方式、穿衣偏好与个性特点</text>
+      </view>
+    </view>
+
+    <view class="step-item">
+      <view class="step-num">2</view>
+      <view class="step-content">
+        <text class="step-title">获得专属风格报告</text>
+        <text class="step-desc">AI分析你的MBTI人格与穿搭DNA</text>
+      </view>
+    </view>
+
+    <view class="step-item">
+      <view class="step-num">3</view>
+      <view class="step-content">
+        <text class="step-title">获取穿搭建议</text>
+        <text class="step-desc">个性化单品推荐与搭配方案</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Privacy Note -->
+  <view class="privacy-note">
+    <text>您的回答仅存储于本地设备，不会上传至任何服务器。</text>
+  </view>
+</view>

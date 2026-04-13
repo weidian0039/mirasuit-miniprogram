@@ -1,0 +1,9 @@
+{
+  "name": "mirasuit-claude-api",
+  "version": "1.0.0",
+  "description": "MIRASUIT — Claude API integration for style analysis",
+  "main": "index.js",
+  "dependencies": {
+    "axios": "~1.6.0"
+  }
+}
