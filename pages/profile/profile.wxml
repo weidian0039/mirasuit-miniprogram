@@ -1,0 +1,182 @@
+<!--pages/profile/profile.wxml-->
+<view class="container">
+  <!-- User Profile Header -->
+  <view class="profile-header">
+    <view class="avatar-section">
+      <view class="avatar-placeholder">
+        <text class="avatar-text">?</text>
+      </view>
+    </view>
+    <view class="profile-info">
+      <text class="username">Your Style Profile</text>
+      <text class="completion" wx:if="{{completion < 100}}">{{completion}}% Complete</text>
+      <text class="completion complete" wx:else>✓ Profile Complete</text>
+    </view>
+  </view>
+
+  <!-- Personality Type Display -->
+  <view class="personality-card" wx:if="{{personality}}">
+    <view class="card-header">
+      <text class="card-title">Your Personality</text>
+    </view>
+    <view class="personality-types">
+      <view class="type-badge">
+        <text class="type-label">MBTI</text>
+        <text class="type-value">{{personality.mbti.type || 'Unknown'}}</text>
+      </view>
+      <view class="type-badge">
+        <text class="type-label">Enneagram</text>
+        <text class="type-value">Type {{personality.enneagram.type || '?'}}</text>
+      </view>
+    </view>
+    <view class="traits" wx:if="{{personality.traits}}">
+      <text class="trait" wx:for="{{personality.traits}}" wx:key="index">{{item}}</text>
+    </view>
+  </view>
+
+  <!-- Style Preferences -->
+  <view class="style-card" wx:if="{{stylePreferences}}">
+    <view class="card-header">
+      <text class="card-title">Style Preferences</text>
+    </view>
+    <view class="style-details">
+      <view class="style-item">
+        <text class="style-label">Preference</text>
+        <text class="style-value">{{stylePreferences.preference || 'Classic'}}</text>
+      </view>
+      <view class="style-item">
+        <text class="style-label">Colors</text>
+        <text class="style-value">{{stylePreferences.colorSuggestions?.join(', ') || 'Navy, Charcoal'}}</text>
+      </view>
+      <view class="style-item">
+        <text class="style-label">Fit</text>
+        <text class="style-value">{{stylePreferences.fitRecommendation || 'Regular'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Action Buttons -->
+  <view class="actions">
+    <button class="btn-secondary" bindtap="retakeQuestionnaire" wx:if="{{completion === 100}}">
+      Retake Analysis
+    </button>
+    <button class="btn-primary" bindtap="startQuestionnaire" wx:else>
+      Start Analysis
+    </button>
+    <button class="btn-outline" bindtap="clearData" wx:if="{{completion > 0}}">
+      Clear Data
+    </button>
+  </view>
+
+  <!-- Style History -->
+  <view class="history-section" wx:if="{{styleHistory.length > 0}}">
+    <view class="section-header">
+      <text class="section-title">Recent Activity</text>
+    </view>
+    <view class="history-list">
+      <view class="history-item" wx:for="{{styleHistory}}" wx:key="timestamp">
+        <text class="history-text">{{item.item || 'Style consultation'}}</text>
+        <text class="history-time">{{item.timestamp}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Privacy Notice -->
+  <view class="privacy-notice">
+    <text class="privacy-icon">🔒</text>
+    <text class="privacy-text">All data stored locally on your device</text>
+  </view>
+
+  <!-- Feedback Button (Alpha Testing) -->
+  <view class="feedback-section">
+    <button class="btn-feedback" bindtap="openFeedback" wx:if="{{!feedbackSubmitted}}">
+      Share Your Feedback
+    </button>
+    <text class="feedback-thanks" wx:else>Thank you for your feedback.</text>
+  </view>
+
+  <!-- Feedback Modal -->
+  <view class="feedback-modal" wx:if="{{showFeedbackModal}}" catchtap="closeFeedback">
+    <view class="feedback-modal-content" catchtap="">
+      <view class="feedback-header">
+        <text class="feedback-title">Share Your Experience</text>
+        <text class="feedback-subtitle">Your feedback helps us refine the service.</text>
+      </view>
+
+      <!-- Star Rating -->
+      <view class="rating-section">
+        <text class="rating-label">Overall experience</text>
+        <view class="stars">
+          <text
+            class="star {{feedbackRating >= 1 ? 'active' : ''}}"
+            data-rating="1"
+            bindtap="setFeedbackRating">★</text>
+          <text
+            class="star {{feedbackRating >= 2 ? 'active' : ''}}"
+            data-rating="2"
+            bindtap="setFeedbackRating">★</text>
+          <text
+            class="star {{feedbackRating >= 3 ? 'active' : ''}}"
+            data-rating="3"
+            bindtap="setFeedbackRating">★</text>
+          <text
+            class="star {{feedbackRating >= 4 ? 'active' : ''}}"
+            data-rating="4"
+            bindtap="setFeedbackRating">★</text>
+          <text
+            class="star {{feedbackRating >= 5 ? 'active' : ''}}"
+            data-rating="5"
+            bindtap="setFeedbackRating">★</text>
+        </view>
+      </view>
+
+      <!-- Stage Selector -->
+      <view class="stage-section">
+        <text class="stage-label">Which part did you try?</text>
+        <view class="stage-options">
+          <text
+            class="stage-chip {{feedbackStage === 'questionnaire' ? 'active' : ''}}"
+            data-stage="questionnaire"
+            bindtap="setFeedbackStage">Questionnaire</text>
+          <text
+            class="stage-chip {{feedbackStage === 'results' ? 'active' : ''}}"
+            data-stage="results"
+            bindtap="setFeedbackStage">Results</text>
+          <text
+            class="stage-chip {{feedbackStage === 'share' ? 'active' : ''}}"
+            data-stage="share"
+            bindtap="setFeedbackStage">Share</text>
+        </view>
+      </view>
+
+      <!-- Comment Field -->
+      <view class="comment-section">
+        <textarea
+          class="comment-input"
+          placeholder="Your thoughts (optional)"
+          maxlength="500"
+          bindinput="setFeedbackComment"
+          value="{{feedbackComment}}"></textarea>
+        <text class="char-count">{{feedbackComment.length || 0}}/500</text>
+      </view>
+
+      <!-- Contact Field -->
+      <view class="contact-section">
+        <input
+          class="contact-input"
+          placeholder="WeChat or nickname (optional)"
+          maxlength="100"
+          bindinput="setFeedbackContact"
+          value="{{feedbackContact}}"/>
+      </view>
+
+      <!-- Actions -->
+      <view class="feedback-actions">
+        <button class="btn-feedback-cancel" bindtap="closeFeedback">Cancel</button>
+        <button class="btn-feedback-submit" bindtap="submitFeedback" disabled="{{!feedbackRating}}">
+          Submit
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

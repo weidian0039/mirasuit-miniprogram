@@ -1,9 +1,13 @@
 {
   "name": "mirasuit-claude-api",
   "version": "1.0.0",
-  "description": "MIRASUIT — Claude API integration for style analysis",
+  "description": "MIRASUIT Claude API Cloud Function - Secure API Key management",
   "main": "index.js",
   "dependencies": {
+    "wx-server-sdk": "~2.6.3",
     "axios": "~1.6.0"
+  },
+  "engines": {
+    "node": ">=12.0.0"
   }
 }

@@ -1,70 +1,60 @@
-<view class="questionnaire-page">
-  <!-- Progress Bar -->
-  <view class="progress-section">
-    <view class="progress-bar">
-      <view class="progress-fill" style="width: {{progressPercent}}%"></view>
-    </view>
-    <view class="progress-text">
-      <text>{{currentIndex + 1}} / {{questions.length}}</text>
-    </view>
-  </view>
-
-  <!-- Question Card -->
-  <view class="card question-card" wx:if="{{!isLoading && !isComplete}}">
-    <text class="question-category">{{currentQuestion.category}}</text>
-    <text class="question-text">{{currentQuestion.text}}</text>
-
-    <!-- Options -->
-    <view class="options-list">
-      <view
-        wx:for="{{currentQuestion.options}}"
-        wx:key="index"
-        class="option-chip {{selectedIndex === index ? 'selected' : ''}}"
-        bindtap="selectOption"
-        data-index="{{index}}"
-      >
-        <text class="option-letter">{{item.letter}}</text>
-        <text class="option-text">{{item.text}}</text>
+<!--questionnaire.wxml-->
+<view class="container">
+  <!-- Header -->
+  <view class="header">
+    <text class="title">Your Style Journey</text>
+    <text class="subtitle">Each answer brings us closer to understanding your wardrobe philosophy</text>
+    <view class="progress">
+      <text class="progress-text">Question {{currentIndex + 1}} of {{totalQuestions}}</text>
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{progress}}%"></view>
       </view>
     </view>
   </view>
 
-  <!-- Loading State -->
-  <view class="loading-container" wx:if="{{isLoading}}">
-    <view class="loading-dots">
-      <view class="loading-dot"></view>
-      <view class="loading-dot"></view>
-      <view class="loading-dot"></view>
-    </view>
-    <text class="loading-text">分析你的风格DNA...</text>
-  </view>
+  <!-- Question Card -->
+  <view class="question-card" wx:if="{{currentQuestion}}">
+    <text class="question-context" wx:if="{{currentQuestion.context}}">{{currentQuestion.context}}</text>
+    <text class="question-text">{{currentQuestion.question}}</text>
 
-  <!-- Complete + Generating -->
-  <view class="card complete-card" wx:if="{{isComplete && isGenerating}}">
-    <view class="loading-dots">
-      <view class="loading-dot"></view>
-      <view class="loading-dot"></view>
-      <view class="loading-dot"></view>
+    <!-- Options -->
+    <view class="options">
+      <view
+        class="option {{responses[category] && responses[category].text === option.text ? 'selected' : ''}}"
+        wx:for="{{currentQuestion.options}}"
+        wx:for-item="option"
+        wx:key="text"
+        bindtap="onOptionSelect"
+        data-option="{{option}}"
+      >
+        <view class="option-radio">
+          <view class="radio-dot" wx:if="{{responses[category] && responses[category].text === option.text}}"></view>
+        </view>
+        <text class="option-text">{{option.text}}</text>
+      </view>
     </view>
-    <text class="complete-title">正在生成你的专属风格报告</text>
-    <text class="complete-desc">基于{{answers.length}}道题答案，AI正在分析...</text>
   </view>
 
   <!-- Navigation -->
-  <view class="nav-section safe-bottom" wx:if="{{!isLoading && !isComplete}}">
+  <view class="navigation">
     <button
-      class="btn-secondary nav-btn-back"
-      wx:if="{{currentIndex > 0}}"
-      bindtap="prevQuestion"
+      class="nav-btn prev-btn {{currentIndex === 0 ? 'disabled' : ''}}"
+      bindtap="onPrevQuestion"
+      disabled="{{currentIndex === 0}}"
     >
-      上一步
+      Back
     </button>
     <button
-      class="btn-primary nav-btn-next"
-      bindtap="nextQuestion"
-      disabled="{{selectedIndex === -1}}"
+      class="nav-btn next-btn {{!hasAnswered ? 'disabled' : ''}}"
+      bindtap="onNextQuestion"
+      disabled="{{!hasAnswered}}"
     >
-      {{currentIndex === questions.length - 1 ? '生成报告' : '下一题'}}
+      {{currentIndex === totalQuestions - 1 ? 'View My Style' : 'Continue'}}
     </button>
+  </view>
+
+  <!-- Loading -->
+  <view class="loading" wx:if="{{loading}}">
+    <text>Curating your style profile...</text>
   </view>
 </view>

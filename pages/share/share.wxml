@@ -1,61 +1,125 @@
-<view class="share-page">
-  <!-- Template Selection -->
-  <view class="card template-card" wx:if="{{!isGenerating}}">
-    <text class="section-title">选择分享模板</text>
+<!--pages/share/share.wxml-->
+<!-- M-10: Social Sharing Page — brand-aligned share card generation -->
+<view class="container">
 
-    <view class="template-list">
-      <view
-        class="template-item {{selectedTemplate === index ? 'selected' : ''}}"
-        wx:for="{{templates}}"
-        wx:key="index"
-        bindtap="selectTemplate"
-        data-index="{{index}}"
-      >
-        <view class="template-preview template-{{item.name}}">
-          <text class="preview-mbti">{{mbti}}</text>
-          <text class="preview-style">{{styleName}}</text>
+  <!-- Page Header -->
+  <view class="share-header">
+    <text class="share-title">Share Your Style</text>
+    <text class="share-subtitle">Your identity, distilled.</text>
+  </view>
+
+  <!-- Share Card Canvas (render target for canvasToTempFilePath) -->
+  <view class="card-canvas-wrapper" style="position:absolute;left:-9999px;top:-9999px;">
+    <canvas type="2d" id="shareCardCanvas" class="card-canvas" canvas-id="shareCardCanvas"
+      style="width:690rpx;height:960rpx;"></canvas>
+  </view>
+
+  <!-- Card Preview -->
+  <view class="card-preview-section">
+    <view class="card-preview" wx:if="{{!loading}}">
+      <view class="preview-frame">
+        <image
+          src="{{generatedCardUrl || ''}}"
+          mode="aspectFill"
+          class="card-preview-image"
+          wx:if="{{generatedCardUrl}}"
+        />
+        <view class="preview-skeleton" wx:else>
+          <view class="preview-skeleton-inner">
+            <text class="skeleton-label">Preview generating...</text>
+          </view>
         </view>
-        <text class="template-name">{{item.label}}</text>
       </view>
     </view>
 
-    <button class="btn-primary generate-btn" bindtap="generateShareCard">
-      生成分享图
+    <!-- Card Template Selector -->
+    <view class="template-selector">
+      <text class="selector-label">Card Style</text>
+      <scroll-view scroll-x class="template-list">
+        <view
+          class="template-item {{selectedTemplate === 'classic' ? 'selected' : ''}}"
+          bindtap="selectTemplate"
+          data-template="classic"
+        >
+          <text class="template-name">Classic</text>
+        </view>
+        <view
+          class="template-item {{selectedTemplate === 'minimal' ? 'selected' : ''}}"
+          bindtap="selectTemplate"
+          data-template="minimal"
+        >
+          <text class="template-name">Minimal</text>
+        </view>
+        <view
+          class="template-item {{selectedTemplate === 'bold' ? 'selected' : ''}}"
+          bindtap="selectTemplate"
+          data-template="bold"
+        >
+          <text class="template-name">Bold</text>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- Share Elements Toggle -->
+    <view class="elements-section">
+      <text class="elements-label">Include</text>
+      <view class="element-toggle">
+        <text class="toggle-label">MBTI Type</text>
+        <switch checked="{{includeMbti}}" bindchange="toggleElement" data-element="mbti" color="#1a1a1a" />
+      </view>
+      <view class="element-toggle">
+        <text class="toggle-label">Style Profile</text>
+        <switch checked="{{includeStyle}}" bindchange="toggleElement" data-element="style" color="#1a1a1a" />
+      </view>
+      <view class="element-toggle">
+        <text class="toggle-label">Style Image</text>
+        <switch checked="{{includeImage}}" bindchange="toggleElement" data-element="image" color="#1a1a1a" />
+      </view>
+    </view>
+  </view>
+
+  <!-- Action Buttons -->
+  <view class="share-actions">
+    <button class="btn-primary" bindtap="generateCard" loading="{{generating}}" disabled="{{generating}}">
+      {{generatedCardUrl ? 'Regenerate Card' : 'Generate Card'}}
+    </button>
+    <view class="action-row">
+      <button class="btn-secondary" bindtap="saveToAlbum" disabled="{{!generatedCardUrl}}">
+        Save to Album
+      </button>
+      <button class="btn-secondary" bindtap="shareToWeChat" disabled="{{!generatedCardUrl}}">
+        Share
+      </button>
+    </view>
+    <button class="btn-outline" bindtap="copyShareText" disabled="{{!personality}}">
+      Copy Text
     </button>
   </view>
 
-  <!-- Generating -->
-  <view class="card generating-card" wx:if="{{isGenerating}}">
-    <view class="loading-dots">
-      <view class="loading-dot"></view>
-      <view class="loading-dot"></view>
-      <view class="loading-dot"></view>
-    </view>
-    <text class="generating-text">正在生成{{templates[selectedTemplate].label}}风格...</text>
-  </view>
-
-  <!-- Preview + Actions -->
-  <view class="card preview-card" wx:if="{{shareImagePath}}">
-    <image src="{{shareImagePath}}" mode="aspectFit" class="share-preview"></image>
-
-    <view class="preview-actions">
-      <button class="btn-primary" bindtap="saveShareCard">保存图片</button>
-      <button class="btn-secondary" bindtap="shareToWeChat">分享到微信</button>
+  <!-- Deep Link Section -->
+  <view class="deeplink-section" wx:if="{{personality}}">
+    <text class="deeplink-title">Share Link</text>
+    <text class="deeplink-desc">Share your style profile with friends via a direct link.</text>
+    <view class="deeplink-row">
+      <text class="deeplink-value">{{shareLink}}</text>
+      <button class="btn-copy" bindtap="copyLink">Copy</button>
     </view>
   </view>
 
-  <!-- Deep Link -->
-  <view class="card deeplink-card" wx:if="{{shareImagePath}}">
-    <text class="section-title">分享链接</text>
-    <text class="deeplink-text">{{shareLink}}</text>
-    <button class="btn-secondary" bindtap="copyShareLink">复制链接</button>
+  <!-- Mini Program QR Placeholder -->
+  <view class="qr-section">
+    <text class="qr-title">Open in Mini Program</text>
+    <text class="qr-desc">Friends can scan this to view your style profile.</text>
+    <view class="qr-placeholder">
+      <text class="qr-icon">⊞</text>
+      <text class="qr-text">QR Code</text>
+      <text class="qr-subtext">Generated at runtime</text>
+    </view>
   </view>
 
-  <!-- Hidden Canvas for rendering -->
-  <canvas
-    type="2d"
-    id="shareCanvas"
-    canvas-id="shareCanvas"
-    style="position:absolute;left:-9999px;width:750px;height:1334px;"
-  ></canvas>
+  <!-- Privacy Note -->
+  <view class="privacy-note">
+    <text class="privacy-text">Your data stays on your device. Shared cards contain only style preferences you choose.</text>
+  </view>
+
 </view>

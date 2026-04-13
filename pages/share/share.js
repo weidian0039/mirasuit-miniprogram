@@ -1,197 +1,344 @@
 // pages/share/share.js
-// M-8 Sprint 3 Delivery — 3-template share card generator
-const app = getApp();
-
-const TEMPLATES = [
-  { name: 'classic', label: '经典', bg: '#1a1a1a', text: '#ffffff' },
-  { name: 'minimal', label: '极简', bg: '#ffffff', text: '#1a1a1a' },
-  { name: 'bold', label: '大胆', bg: '#000000', accent: '#FF6B35', text: '#ffffff' },
-];
+// M-10: Social Sharing Page — generates brand-aligned share cards
+const UserProfileManager = require('../../utils/userProfile');
+const logger = require('../../services/logger');
+const Analytics = require('../../services/analytics');
+const analytics = new Analytics({ useCloudFunction: true });
 
 Page({
   data: {
-    mbti: '',
-    styleName: '',
-    templates: TEMPLATES,
-    selectedTemplate: 0,
-    isGenerating: false,
-    shareImagePath: '',
-    shareLink: '',
+    loading: false,
+    generating: false,
+    generatedCardUrl: null,
+    personality: null,
+    recommendations: null,
+    styleImage: null,
+    selectedTemplate: 'classic',
+    includeMbti: true,
+    includeStyle: true,
+    includeImage: true,
+    shareLink: ''
   },
 
   onLoad(options) {
-    const mbti = options.mbti || app.globalData.styleResult?.mbti || 'INTJ';
-    const style = options.style || app.globalData.styleResult?.styleName || '智性优雅型';
+    logger.userAction('page-load', { page: 'share' });
+    analytics.trackFunnel('share_view'); // M-14 funnel tracking
+    this.loadProfile();
+
+    // Handle deep link query params
+    if (options.mbti || options.style) {
+      logger.info('Share page opened via deep link', options);
+    }
+  },
+
+  onShow() {
+    // Refresh profile data in case it changed
+    this.loadProfile();
+  },
+
+  loadProfile() {
+    const profileManager = new UserProfileManager();
+    const profile = profileManager.getProfile();
+    const { personality, stylePreferences, styleHistory } = profile;
+
+    if (!personality) {
+      logger.warn('Share page: no profile data found');
+      return;
+    }
+
+    const mbtiType = personality.mbti?.type || '';
+    const style = stylePreferences?.preferredStyles?.[0] || stylePreferences?.preference || 'Classic';
 
     this.setData({
-      mbti,
-      styleName: decodeURIComponent(style),
-      shareLink: `https://weidian0039.github.io/mirasuit-h5/?mbti=${mbti}&style=${encodeURIComponent(style)}`,
+      personality,
+      recommendations: { recommendedStyles: [style] },
+      styleImage: profile.styleImage || null,
+      shareLink: this.buildShareLink(mbtiType, style)
     });
+
+    // Auto-generate card on load
+    this.generateCard();
+  },
+
+  buildShareLink(mbtiType, style) {
+    const base = 'pages/share/share';
+    const query = `mbti=${encodeURIComponent(mbtiType)}&style=${encodeURIComponent(style)}`;
+    return `${base}?${query}`;
   },
 
   selectTemplate(e) {
-    this.setData({ selectedTemplate: e.currentTarget.dataset.index });
+    const template = e.currentTarget.dataset.template;
+    this.setData({ selectedTemplate: template });
+    if (this.data.generatedCardUrl) {
+      this.generateCard();
+    }
   },
 
-  generateShareCard() {
-    if (this.data.isGenerating) return;
-    this.setData({ isGenerating: true });
-
-    this._renderCard()
-      .then(path => {
-        this.setData({ shareImagePath: path, isGenerating: false });
-      })
-      .catch(err => {
-        console.error('[MIRA] Share card generation failed:', err);
-        this.setData({ isGenerating: false });
-        wx.showToast({ title: '生成失败', icon: 'none' });
-      });
+  toggleElement(e) {
+    const element = e.currentTarget.dataset.element;
+    const key = `include${element.charAt(0).toUpperCase() + element.slice(1)}`;
+    this.setData({ [key]: e.detail.value });
+    if (this.data.generatedCardUrl) {
+      this.generateCard();
+    }
   },
 
-  _renderCard() {
-    return new Promise((resolve, reject) => {
-      const tpl = TEMPLATES[this.data.selectedTemplate];
-      const W = 750;
-      const H = 1334;
+  generateCard() {
+    if (this.data.generating) return;
+    this.setData({ generating: true, generatedCardUrl: null });
 
-      const query = wx.createSelectorQuery();
-      query.select('#shareCanvas')
-        .fields({ node: true, size: true })
-        .exec(res => {
-          const canvas = res[0].node;
-          const ctx = canvas.getContext('2d');
-          const dpr = wx.getSystemInfoSync().pixelRatio;
+    try {
+      const { personality, recommendations, styleImage, selectedTemplate } = this.data;
+      const ctx = wx.createCanvasContext('shareCardCanvas');
 
-          canvas.width = W * dpr;
-          canvas.height = H * dpr;
-          ctx.scale(dpr, dpr);
+      // Card dimensions: 690rpx x 960rpx → px
+      const DPR = wx.getSystemInfoSync().pixelRatio || 2;
+      const cardW = 690 * DPR;
+      const cardH = 960 * DPR;
 
-          // Background
-          ctx.fillStyle = tpl.bg;
-          ctx.fillRect(0, 0, W, H);
+      // Template-based theming
+      const templates = {
+        classic: { bg: '#ffffff', accent: '#1a1a1a', text: '#1a1a1a', subtext: '#666666' },
+        minimal: { bg: '#fafafa', accent: '#888888', text: '#333333', subtext: '#999999' },
+        bold: { bg: '#1a1a1a', accent: '#ffffff', text: '#ffffff', subtext: 'rgba(255,255,255,0.6)' }
+      };
+      const tpl = templates[selectedTemplate] || templates.classic;
 
-          // Accent gradient for bold
-          if (tpl.accent) {
-            const grad = ctx.createLinearGradient(0, 0, W, H);
-            grad.addColorStop(0, '#000000');
-            grad.addColorStop(1, tpl.accent);
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, W, H);
-          }
+      // Background
+      ctx.setFillStyle(tpl.bg);
+      ctx.fillRect(0, 0, cardW, cardH);
 
-          // Top decoration
-          ctx.fillStyle = tpl.name === 'minimal' ? '#f0f0f0' : 'rgba(255,255,255,0.05)';
-          ctx.fillRect(0, 0, W, 200);
+      // Top decorative line
+      ctx.setStrokeStyle(tpl.accent);
+      ctx.setLineWidth(4 * DPR);
+      ctx.beginPath();
+      ctx.moveTo(40 * DPR, 0);
+      ctx.lineTo(40 * DPR, 60 * DPR);
+      ctx.stroke();
 
-          // MBTI Letters
-          ctx.setFillStyle(tpl.text);
-          ctx.setTextAlign('center');
-          ctx.font = '200 180rpx -apple-system, BlinkMacSystemFont, sans-serif';
-          ctx.letterSpacing = '20px';
-          ctx.fillText(this.data.mbti, W / 2, 500);
+      // Brand name
+      ctx.setFontSize(24 * DPR);
+      ctx.setFillStyle(tpl.subtext);
+      ctx.setTextAlign('left');
+      ctx.fillText('MIRASUIT', 40 * DPR, 100 * DPR);
 
-          // Divider
-          ctx.fillStyle = tpl.name === 'minimal' ? '#e0e0e0' : 'rgba(255,255,255,0.2)';
-          ctx.fillRect(W / 2 - 60, 560, 120, 2);
+      // MBTI Section
+      if (this.data.includeMbti && personality?.mbti) {
+        ctx.setFontSize(72 * DPR);
+        ctx.setFillStyle(tpl.text);
+        ctx.setTextAlign('left');
+        ctx.fillText(personality.mbti.type || '', 40 * DPR, 220 * DPR);
 
-          // Style Name
-          ctx.setFillStyle(tpl.text);
-          ctx.font = '500 52rpx -apple-system, BlinkMacSystemFont, sans-serif';
-          ctx.fillText(this.data.styleName, W / 2, 660);
-
-          // Description
-          ctx.setFillStyle(tpl.name === 'minimal' ? '#999' : 'rgba(255,255,255,0.6)');
-          ctx.font = '300 28rpx -apple-system, BlinkMacSystemFont, sans-serif';
-          ctx.fillText('发现你的专属穿衣风格', W / 2, 720);
-
-          // MBTI Type descriptions
-          const typeDesc = this._getTypeDesc(this.data.mbti);
-          ctx.fillText(typeDesc, W / 2, 770);
-
-          // Brand
-          ctx.setFillStyle(tpl.name === 'minimal' ? '#ccc' : 'rgba(255,255,255,0.3)');
-          ctx.font = '300 22rpx -apple-system, BlinkMacSystemFont, sans-serif';
-          ctx.fillText('MIRASUIT · YOUR STYLE IDENTITY', W / 2, H - 120);
-
-          // QR Code placeholder area
-          ctx.fillStyle = tpl.name === 'minimal' ? '#f5f5f5' : 'rgba(255,255,255,0.1)';
-          this._roundRect(ctx, W / 2 - 100, H - 360, 200, 200, 16);
-          ctx.fill();
-
-          ctx.setFillStyle(tpl.name === 'minimal' ? '#ddd' : 'rgba(255,255,255,0.3)');
-          ctx.font = '200 24rpx -apple-system, BlinkMacSystemFont, sans-serif';
-          ctx.fillText('扫码测试', W / 2, H - 210);
-
-          wx.canvasToTempFilePath({
-            canvasId: 'shareCanvas',
-            canvasType: '2d',
-            success: res => resolve(res.tempFilePath),
-            fail: reject,
+        const desc = personality.mbti.description || '';
+        if (desc) {
+          ctx.setFontSize(22 * DPR);
+          ctx.setFillStyle(tpl.subtext);
+          const lines = this.wrapText(ctx, desc, 580 * DPR);
+          lines.forEach((line, i) => {
+            ctx.fillText(line, 40 * DPR, 270 * DPR + i * 34 * DPR);
           });
+        }
+      }
+
+      // Style Section
+      if (this.data.includeStyle && recommendations?.recommendedStyles?.length) {
+        const styleY = personality?.mbti ? 420 * DPR : 220 * DPR;
+        ctx.setFontSize(20 * DPR);
+        ctx.setFillStyle(tpl.subtext);
+        ctx.setTextAlign('left');
+        ctx.fillText('STYLE FOUNDATION', 40 * DPR, styleY);
+
+        const styles = recommendations.recommendedStyles;
+        ctx.setFontSize(28 * DPR);
+        ctx.setFillStyle(tpl.text);
+        ctx.fillText(styles.join(' · '), 40 * DPR, styleY + 40 * DPR);
+
+        // Decorative separator
+        ctx.setStrokeStyle(tpl.subtext);
+        ctx.setLineWidth(1 * DPR);
+        ctx.setLineDash([8 * DPR, 8 * DPR]);
+        ctx.beginPath();
+        ctx.moveTo(40 * DPR, styleY + 70 * DPR);
+        ctx.lineTo(650 * DPR, styleY + 70 * DPR);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Image Section
+      if (this.data.includeImage && styleImage?.imageUrl) {
+        const imgY = 540 * DPR;
+        ctx.save();
+        // Rounded rect via path (roundRect not supported in all WeChat versions)
+        const rx = 8 * DPR, ry = 8 * DPR;
+        const w = cardW - 80 * DPR, h = 200 * DPR;
+        const x = 40 * DPR;
+        ctx.beginPath();
+        ctx.moveTo(x + rx, imgY);
+        ctx.lineTo(x + w - rx, imgY);
+        ctx.quadraticCurveTo(x + w, imgY, x + w, imgY + rx);
+        ctx.lineTo(x + w, imgY + h - ry);
+        ctx.quadraticCurveTo(x + w, imgY + h, x + w - rx, imgY + h);
+        ctx.lineTo(x + rx, imgY + h);
+        ctx.quadraticCurveTo(x, imgY + h, x, imgY + h - ry);
+        ctx.lineTo(x, imgY + rx);
+        ctx.quadraticCurveTo(x, imgY, x + rx, imgY);
+        ctx.closePath();
+        ctx.clip();
+        ctx.drawImage(styleImage.imageUrl, x, imgY, w, h);
+        ctx.restore();
+      }
+
+      // Bottom CTA
+      const ctaY = cardH - 120 * DPR;
+      ctx.setFontSize(20 * DPR);
+      ctx.setFillStyle(tpl.subtext);
+      ctx.setTextAlign('center');
+      ctx.fillText('Discover your style at MIRASUIT', cardW / 2, ctaY);
+
+      // Watermark (brand-aligned: extremely subtle)
+      ctx.setFontSize(16 * DPR);
+      ctx.setFillStyle(tpl.subtext === '#666666' || tpl.subtext === '#999999' || tpl.subtext === 'rgba(255,255,255,0.6)' ? tpl.subtext : tpl.subtext);
+      ctx.globalAlpha = 0.3;
+      ctx.fillText('MIRASUIT', cardW / 2, ctaY + 40 * DPR);
+      ctx.globalAlpha = 1;
+
+      ctx.draw(false, () => {
+        wx.canvasToTempFilePath({
+          canvasId: 'shareCardCanvas',
+          quality: 0.9,
+          success: (res) => {
+            this.setData({
+              generatedCardUrl: res.tempFilePath,
+              generating: false
+            });
+            logger.info('Share card generated', {
+              template: selectedTemplate,
+              hasImage: !!styleImage?.imageUrl
+            });
+          },
+          fail: (err) => {
+            logger.captureError(err, { context: 'generateCard' });
+            this.setData({ generating: false });
+            wx.showToast({ title: 'Failed to generate card', icon: 'none' });
+          }
         });
-    });
+      });
+    } catch (error) {
+      logger.captureError(error, { context: 'generateCard' });
+      this.setData({ generating: false });
+      wx.showToast({ title: 'Failed to generate card', icon: 'none' });
+    }
   },
 
-  _roundRect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
+  wrapText(ctx, text, maxWidth) {
+    const chars = text.split('');
+    const lines = [];
+    let current = '';
+    for (const char of chars) {
+      const test = current + char;
+      if (ctx.measureText(test).width > maxWidth) {
+        lines.push(current);
+        current = char;
+      } else {
+        current = test;
+      }
+    }
+    if (current) lines.push(current);
+    return lines.slice(0, 4); // max 4 lines
   },
 
-  _getTypeDesc(mbti) {
-    const descs = {
-      'ISTJ': '经典实用 · 注重品质', 'ISFJ': '内敛精致 · 低调有质',
-      'INFJ': '文艺质感 · 小众品味', 'INTJ': '智性优雅 · 极简大气',
-      'ISTP': '都市机能 · 实用主义', 'ISFP': '艺术随性 · 个性混搭',
-      'INFP': '诗意自在 · 自我表达', 'INTP': '解构理性 · 版型面料',
-      'ESTP': '时尚活力 · 都市有型', 'ESFP': '张扬个性 · 色彩大胆',
-      'ENFP': '创意灵动 · 多变有趣', 'ENTP': '先锋智趣 · 态度鲜明',
-      'ESTJ': '商务精英 · 干练得体', 'ESFJ': '温暖得体 · 亲和精致',
-      'ENFJ': '魅力领袖 · 气场十足', 'ENTJ': '权力质感 · 极简有力',
-    };
-    return descs[mbti] || '发现你的专属风格';
-  },
+  saveToAlbum() {
+    if (!this.data.generatedCardUrl) return;
 
-  saveShareCard() {
-    if (!this.data.shareImagePath) return;
     wx.saveImageToPhotosAlbum({
-      filePath: this.data.shareImagePath,
-      success: () => wx.showToast({ title: '已保存到相册', icon: 'success' }),
-      fail: () => wx.showToast({ title: '保存失败', icon: 'none' }),
-    });
-  },
-
-  copyShareLink() {
-    wx.setClipboardData({
-      data: this.data.shareLink,
-      success: () => wx.showToast({ title: '链接已复制', icon: 'success' }),
+      filePath: this.data.generatedCardUrl,
+      success: () => {
+        wx.showToast({ title: 'Saved to album', icon: 'success' });
+        logger.userAction('share_card_save', {});
+      },
+      fail: (error) => {
+        if (error.errMsg && error.errMsg.includes('auth deny')) {
+          wx.showModal({
+            title: 'Permission Required',
+            content: 'Please allow photo album access in Settings.',
+            confirmText: 'Open Settings',
+            success: (res) => {
+              if (res.confirm) wx.openSetting();
+            }
+          });
+        } else {
+          wx.showToast({ title: 'Save failed', icon: 'none' });
+        }
+      }
     });
   },
 
   shareToWeChat() {
-    wx.showShareMenu({ withShareTicket: true });
+    if (!this.data.generatedCardUrl) return;
+
+    wx.showShareMenu({
+      withShareTicket: true,
+      menus: ['shareTimeline', 'shareAppMessage']
+    });
+
+    const { personality, recommendations } = this.data;
+    this.setData({
+      shareData: {
+        title: `My Style: ${personality?.mbti?.type || ''} — ${recommendations?.recommendedStyles?.[0] || 'Classic'}`,
+        path: '/pages/share/share',
+        imageUrl: this.data.generatedCardUrl,
+        query: `mbti=${personality?.mbti?.type || ''}`
+      }
+    });
+
+    wx.showToast({ title: 'Share menu opened', icon: 'success' });
+    logger.userAction('share_card_wechat', { template: this.data.selectedTemplate });
+  },
+
+  copyShareText() {
+    const { personality, recommendations } = this.data;
+    if (!personality) return;
+
+    const mbtiType = personality.mbti?.type || 'Unknown';
+    const style = recommendations?.recommendedStyles?.[0] || 'Classic';
+    const insight = personality.mbti?.description || 'A refined approach to menswear.';
+
+    const shareText = `My Style Identity\n\nMBTI: ${mbtiType}\n${insight}\n\nStyle Foundation: ${style}\n\nThis is not a prescription — it's a starting point.\n\nDiscover your style at MIRASUIT.`;
+
+    wx.setClipboardData({
+      data: shareText,
+      success: () => {
+        wx.showToast({ title: 'Copied to clipboard', icon: 'success' });
+        logger.userAction('share_text_copy', { mbti: mbtiType });
+      }
+    });
+  },
+
+  copyLink() {
+    const link = `weixin://dl/business/?t=${encodeURIComponent(this.data.shareLink)}`;
+    wx.setClipboardData({
+      data: this.data.shareLink,
+      success: () => {
+        wx.showToast({ title: 'Link copied', icon: 'success' });
+        logger.userAction('share_link_copy', {});
+      }
+    });
   },
 
   onShareAppMessage() {
+    const { personality, recommendations } = this.data;
     return {
-      title: `我的MIRASUIT风格是${this.data.mbti}——${this.data.styleName}`,
-      path: `/pages/questionnaire/questionnaire?mbti=${this.data.mbti}`,
+      title: `My MIRASUIT Style: ${personality?.mbti?.type || ''}`,
+      path: '/pages/share/share',
+      imageUrl: this.data.generatedCardUrl || ''
     };
   },
 
   onShareTimeline() {
+    const { personality, recommendations } = this.data;
     return {
-      title: `MIRASUIT风格测试：${this.data.mbti} ${this.data.styleName}`,
-      query: `mbti=${this.data.mbti}&style=${encodeURIComponent(this.data.styleName)}`,
+      title: `My Style: ${personality?.mbti?.type || ''} — ${recommendations?.recommendedStyles?.[0] || 'Classic'}`,
+      query: `mbti=${personality?.mbti?.type || ''}`
     };
-  },
+  }
 });

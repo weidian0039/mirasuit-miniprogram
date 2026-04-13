@@ -1,53 +1,64 @@
 // pages/home/home.js
-const app = getApp();
+// M-15 Performance: lazy-require Analytics to keep onLoad critical path clean
+const { QuestionnaireManager } = require('../../utils/questionnaire');
 
 Page({
   data: {
-    hasResult: false,
-    styleResult: null,
+    questionnaireComplete: false
   },
 
   onLoad() {
-    this.checkExistingResult();
+    // M-15: fire-and-forget funnel track — no analytics constructor on critical path
+    this._trackFunnelLazy();
   },
 
   onShow() {
-    this.checkExistingResult();
+    // M-15: deferred storage read — not on critical path
+    this._checkQuestionnaireAsync();
   },
 
-  checkExistingResult() {
-    const result = app.globalData.styleResult;
-    const profile = app.globalData.userProfile;
-    if (result && profile) {
-      this.setData({
-        hasResult: true,
-        styleResult: result,
-      });
+  // M-15: Lazy analytics — require + instantiate only when needed (non-blocking)
+  _trackFunnelLazy() {
+    try {
+      const Analytics = require('../../services/analytics');
+      const analytics = new Analytics({ useCloudFunction: true });
+      analytics.trackFunnel('home_view');
+    } catch (e) {
+      // Analytics failure must not block page render
     }
   },
 
-  startJourney() {
-    // Check if returning user wants to retake
-    const result = this.data.hasResult;
-    if (result) {
-      wx.showModal({
-        title: '重新测试',
-        content: '重新测试将覆盖您之前的风格报告。确定继续？',
-        confirmText: '继续',
-        cancelText: '取消',
-        success: (res) => {
-          if (res.confirm) {
-            app.clearProgress();
-            wx.navigateTo({ url: '/pages/questionnaire/questionnaire' });
-          }
-        },
+  // M-15: Async storage read — defers off critical path
+  _checkQuestionnaireAsync() {
+    const qm = new QuestionnaireManager();
+    const isComplete = qm.isComplete();
+    this.setData({ questionnaireComplete: isComplete });
+  },
+
+  startAnalysis() {
+    const qm = new QuestionnaireManager();
+    qm.loadFromStorage();
+
+    if (qm.isComplete()) {
+      // User already completed questionnaire, go to results
+      wx.navigateTo({
+        url: '/pages/results/results'
       });
     } else {
-      wx.navigateTo({ url: '/pages/questionnaire/questionnaire' });
+      // Start questionnaire
+      wx.showModal({
+        title: 'Style Analysis',
+        content: 'This will take about 2 minutes. Answer honestly for best results.',
+        confirmText: 'Start',
+        cancelText: 'Cancel',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({
+              url: '/pages/questionnaire/questionnaire'
+            });
+          }
+        }
+      });
     }
-  },
-
-  viewResult() {
-    wx.switchTab({ url: '/pages/results/results' });
-  },
+  }
 });

@@ -1,9 +1,13 @@
 {
   "name": "mirasuit-image-api",
   "version": "1.0.0",
-  "description": "MIRASUIT — Image generation via OpenAI DALL-E",
+  "description": "MIRASUIT Image Generation Cloud Function - DALL-E 3 + FLUX",
   "main": "index.js",
   "dependencies": {
+    "wx-server-sdk": "~2.6.3",
     "axios": "~1.6.0"
+  },
+  "engines": {
+    "node": ">=12.0.0"
   }
 }

@@ -1,174 +1,217 @@
-.questionnaire-page {
+/* questionnaire.wxss */
+.container {
   min-height: 100vh;
-  background: var(--brand-bg);
-  padding-bottom: 32rpx;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+  padding: 40rpx;
+  display: flex;
+  flex-direction: column;
 }
 
-.progress-section {
-  padding: 32rpx 32rpx 0;
-  background: var(--brand-card);
+/* Header */
+.header {
+  margin-bottom: 60rpx;
+}
+
+.title {
+  display: block;
+  font-size: 56rpx;
+  font-weight: 300;
+  color: #1a1a1a;
+  letter-spacing: 4rpx;
+  margin-bottom: 16rpx;
+}
+
+.subtitle {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+  font-weight: 300;
+  margin-bottom: 40rpx;
+}
+
+/* Progress */
+.progress {
+  margin-top: 30rpx;
+}
+
+.progress-text {
+  display: block;
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 16rpx;
+  letter-spacing: 2rpx;
 }
 
 .progress-bar {
   width: 100%;
-  height: 6rpx;
-  background: var(--brand-border);
-  border-radius: 3rpx;
+  height: 2rpx;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 2rpx;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background: var(--brand-black);
-  border-radius: 3rpx;
-  transition: width 0.4s ease;
+  background: #1a1a1a;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.progress-text {
-  text-align: center;
-  padding: 12rpx 0 24rpx;
-  font-size: 22rpx;
-  color: var(--brand-light-gray);
-  font-weight: 300;
-}
-
+/* Question Card */
 .question-card {
-  margin-top: 16rpx;
-  animation: fadeIn 0.3s ease;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 50rpx 40rpx;
+  margin-bottom: 50rpx;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.04);
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10rpx); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(48rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.question-category {
+.question-context {
   display: block;
-  font-size: 22rpx;
-  color: var(--brand-light-gray);
-  text-transform: uppercase;
-  letter-spacing: 2rpx;
-  margin-bottom: 16rpx;
+  font-size: 26rpx;
+  color: #888;
+  line-height: 1.7;
   font-weight: 300;
+  font-style: italic;
+  margin-bottom: 30rpx;
+  letter-spacing: 1rpx;
 }
 
 .question-text {
   display: block;
   font-size: 36rpx;
-  font-weight: 400;
-  color: var(--brand-black);
-  line-height: 1.5;
-  margin-bottom: 40rpx;
-}
-
-.options-list {
-  display: flex;
-  flex-direction: column;
-}
-
-.option-chip {
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-  padding: 28rpx 28rpx;
-  background: var(--brand-bg);
-  border: 1rpx solid var(--brand-border);
-  border-radius: var(--brand-radius);
-  margin-bottom: 16rpx;
-  transition: all 0.2s;
-}
-
-.option-chip.selected {
-  background: var(--brand-black);
-  border-color: var(--brand-black);
-}
-
-.option-letter {
-  flex-shrink: 0;
-  width: 48rpx;
-  height: 48rpx;
-  background: var(--brand-card);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24rpx;
-  font-weight: 500;
-  color: var(--brand-black);
-  border: 1rpx solid var(--brand-border);
-  transition: all 0.2s;
-}
-
-.option-chip.selected .option-letter {
-  background: rgba(255,255,255,0.15);
-  border-color: rgba(255,255,255,0.3);
-  color: #ffffff;
-}
-
-.option-chip.selected .option-text {
-  color: #ffffff;
-}
-
-.option-text {
-  font-size: 28rpx;
-  color: var(--brand-black);
-  line-height: 1.4;
-  transition: color 0.2s;
-}
-
-/* Loading */
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 200rpx 0;
-}
-
-.loading-text {
-  font-size: 28rpx;
-  color: var(--brand-gray);
-  margin-top: 32rpx;
+  color: #1a1a1a;
+  line-height: 1.6;
   font-weight: 300;
+  margin-bottom: 50rpx;
 }
 
-/* Complete */
-.complete-card {
-  margin-top: 24rpx;
+/* Options */
+.options {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
   gap: 24rpx;
 }
 
-.complete-title {
-  font-size: 36rpx;
-  font-weight: 500;
-  color: var(--brand-black);
+.option {
+  display: flex;
+  align-items: center;
+  padding: 30rpx 24rpx;
+  background: #fafafa;
+  border-radius: 12rpx;
+  border: 1rpx solid transparent;
+  transition: all 0.3s ease;
 }
 
-.complete-desc {
-  font-size: 26rpx;
-  color: var(--brand-gray);
+.option.selected {
+  background: #1a1a1a;
+  border-color: #1a1a1a;
+}
+
+.option.selected .option-text {
+  color: #fff;
+}
+
+.option-radio {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  border: 2rpx solid #ddd;
+  margin-right: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.option.selected .option-radio {
+  border-color: #fff;
+  background: #fff;
+}
+
+.radio-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background: #1a1a1a;
+}
+
+.option-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.5;
   font-weight: 300;
 }
 
 /* Navigation */
-.nav-section {
+.navigation {
   display: flex;
-  gap: 24rpx;
-  padding: 32rpx;
+  gap: 20rpx;
+  margin-top: auto;
 }
 
-.nav-btn-back {
-  flex: 0 0 200rpx;
-}
-
-.nav-btn-next {
+.nav-btn {
   flex: 1;
+  height: 88rpx;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  font-weight: 300;
+  letter-spacing: 2rpx;
+  border: none;
+  transition: all 0.3s ease;
 }
 
-.nav-btn-next[disabled] {
+.prev-btn {
+  background: #fff;
+  color: #1a1a1a;
+  border: 1rpx solid #e0e0e0;
+}
+
+.prev-btn.disabled {
   opacity: 0.3;
+}
+
+.next-btn {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.next-btn.disabled {
+  background: #ccc;
+  opacity: 0.5;
+}
+
+/* Loading */
+.loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loading text,
+.loading-text {
+  font-size: 32rpx;
+  color: #1a1a1a;
+  font-weight: 300;
+  letter-spacing: 2rpx;
 }

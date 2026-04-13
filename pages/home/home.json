@@ -1,5 +1,6 @@
 {
   "navigationBarTitleText": "MIRASUIT",
   "navigationBarBackgroundColor": "#1a1a1a",
-  "navigationBarTextStyle": "white"
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#fafafa"
 }

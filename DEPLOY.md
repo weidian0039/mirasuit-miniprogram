@@ -1,150 +1,140 @@
-# MIRASUIT — Deploy Guide
+# MIRASUIT M-12 Alpha Launch — 部署指南
 
-**Estimated time: 20 minutes** | **No coding required — this is all GUI steps**
-
----
-
-## Before You Start
-
-You need 4 things. If you don't have them yet, get them first.
-
-| What you need | Where to get it | Time |
-|--------------|----------------|------|
-| WeChat App ID | [WeChat Developer Console](https://mp.weixin.qq.com/) → Settings → Account Info | 5 min (register if needed) |
-| `ANTHROPIC_API_KEY` | [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys) | 2 min |
-| `OPENAI_API_KEY` | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) | 2 min |
-| `REPLICATE_API_TOKEN` | [replicate.com/account/api-tokens](https://replicate.com/account/api-tokens) | 2 min |
+**执行时间**: ~20 分钟
+**Tech Lead**: 9015e695-4269-47df-a58a-b1342cbca7c2
+**最后更新**: 2026-04-12
 
 ---
 
-## Step 1: Update App ID (30 seconds)
+## 一键部署（推荐）
 
-Open `project.config.json` in this repo and replace `YOUR_WECHAT_APP_ID`:
+```bash
+cd mirasuit-miniprogram
+
+# 只需填入 AppID，其他参数可选
+./deploy.sh <WECHAT_APP_ID> [ANTHROPIC_KEY] [OPENAI_KEY] [REPLICATE_KEY]
+
+# 示例（带 API key）
+./deploy.sh wx1234567890abcdef sk-ant-xxx sk-proj-xxx r8_xxx
+
+# 示例（仅 AppID）
+./deploy.sh wx1234567890abcdef
+```
+
+脚本会自动：
+- ✅ 更新 `project.config.json` 的 AppID
+- ✅ 生成环境变量配置说明
+- ✅ 生成云函数部署指南
+- ✅ 生成 H5 部署指南
+- ✅ 生成小程序上传指南
+- ✅ 生成 `verify.sh` 验证脚本
+
+---
+
+## 手动部署（不用脚本）
+
+### Step 1 — project.config.json（第 45 行）
 
 ```json
-{
-  "appid": "wx1234567890abcdef"   ← replace with your real App ID
-}
+"appid": "wx你的真实AppID"
 ```
 
-> **Where to find your App ID:** WeChat Developer Console → Settings → Account Info → App ID
+### Step 2 — 环境变量（微信云控制台）
 
----
+**网址**: https://cloud.weixin.qq.com/
+**路径**: 云开发控制台 → 设置 → 环境变量 → 添加
 
-## Step 2: Deploy Cloud Functions (10 minutes)
+| 变量名 | 值 |
+|--------|-----|
+| `ANTHROPIC_API_KEY` | `sk-ant-...` |
+| `OPENAI_API_KEY` | `sk-proj-...` |
+| `REPLICATE_API_KEY` | `r8_...` |
 
-1. Download and install [WeChat Developer Tools](https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html)
-2. Log in with your WeChat account
-3. Click **Import Project** → select this `mirasuit-miniprogram` folder
-4. Set App ID to match what you entered in Step 1
-5. Click **Confirm**
+### Step 3 — 云函数部署（WeChat DevTools）
 
-For each cloud function, right-click the folder and deploy:
+必须从 WeChat DevTools 打开 `mirasuit-miniprogram` 项目：
 
-```
-cloud-functions/
-├── mirasuit-claude-api/    → Right-click → Upload and Deploy → Upload and Deploy (with cloud dependencies)
-├── mirasuit-image-api/     → Same process
-└── mirasuit-video-api/     → Same process
-```
+1. 右键 `cloud-functions/mirasuit-claude-api` → 上传并部署（云端安装依赖）
+2. 右键 `cloud-functions/mirasuit-image-api` → 上传并部署（云端安装依赖）
+3. 右键 `cloud-functions/mirasuit-video-api` → 上传并部署（云端安装依赖）
 
-Wait ~1 minute per function for deployment to complete.
+### Step 4 — H5 部署
 
----
+```bash
+# Netlify
+netlify deploy --prod --dir=h5 --site=YOUR_SITE_ID
 
-## Step 3: Configure API Keys (5 minutes)
-
-1. Open [WeChat Cloud Console](https://cloud.weixin.qq.com/)
-2. Select your environment (usually the default one)
-3. Go to **Functions** → click each function → **Settings** → **Environment Variables**
-4. Add these to **each** function:
-
-```
-ANTHROPIC_API_KEY=sk-ant-...(your Anthropic key)
-OPENAI_API_KEY=sk-proj-...(your OpenAI key)
-REPLICATE_API_TOKEN=r8_...(your Replicate token)
+# Vercel
+vercel --prod --publicDirectory=h5
 ```
 
-> **Important:** These go in each function's environment variables, NOT in a `.env` file.
-
----
-
-## Step 4: Upload Experience Version (2 minutes)
-
-In WeChat Developer Tools:
-1. Click **Details** (top right)
-2. Click **Upload**
-3. Add a version note (e.g., "v1.0 Alpha")
-4. Click **Submit**
-
-WeChat will review within 1-7 days. You get a notification when it's live.
-
----
-
-## Step 5: Share with Alpha Users
-
-Once approved, share your miniprogram QR code:
-
-**Your H5 landing page** (for sharing on social media):
+**H5 URL 必须包含 appid**:
 ```
-https://weidian0039.github.io/mirasuit-h5/?appid=YOUR_APP_ID
+https://your-domain.com/?appid=wx123...
 ```
 
-Replace `YOUR_APP_ID` with your actual App ID. This page shows a QR code that opens the miniprogram directly.
-
----
-
-## Verification Checklist
-
-Run this after each step to confirm it worked:
-
-### After Step 2 (Cloud Functions)
-In WeChat DevTools console, run:
+**微信短链**（h5/index.html 第 343 行）:
 ```javascript
-wx.cloud.callFunction({ name: 'mirasuit-claude-api', data: { action: 'health' } })
-// Expected: { status: 'ok', apiKeyConfigured: true }
+// 当前占位符:
+const wechatSearchUrl = `https://wxaurl.com/`;
+// 替换为微信公众平台生成的 URL Link
 ```
 
-### After Step 3 (API Keys)
-Same health check should show `apiKeyConfigured: true` for all 3 functions.
+### Step 5 — 小程序上传（WeChat DevTools）
 
-### After Step 4 (Upload)
-- Check [WeChat Developer Console](https://mp.weixin.qq.com/) → Version Management
-- Your uploaded version should appear within seconds
-
-### After Step 5 (QR Code)
-Open the H5 URL with your App ID and verify the QR code renders.
+1. 确认 `project.config.json` 的 `appid` 已填写
+2. 点击「上传」→ 填写版本号 `1.0.0` → 备注 `Alpha Launch M-12`
+3. 登录微信公众平台 → 管理 → 版本管理 → 体验版二维码
 
 ---
 
-## Troubleshooting
+## 验证部署
 
-| Problem | Solution |
-|---------|---------|
-| "appid not found" | Double-check Step 1 — App ID must match exactly |
-| Cloud function deploy fails | Make sure you're logged into WeChat DevTools |
-| API keys not working | They're set per-function in Cloud Console, not in a file |
-| QR code shows blank | Make sure the App ID is correct in the URL parameter |
-| Upload button greyed out | Make sure App ID is set in project.config.json |
+云函数部署 + 环境变量配置完成后，运行:
 
----
+```bash
+./verify.sh <WECHAT_CLOUD_ENV_ID>
 
-## What's Already Done
+# 查找 ENV_ID: 微信云控制台 → 云开发 → 环境 → 复制环境 ID
+# 格式: tcb-xxxxxxxx-xxxx
+```
 
-Everything below was pre-configured and pushed to GitHub. You don't need to touch this:
-
-- 52 source files (pages, services, cloud functions) ✅
-- 11 JavaScript files, all syntax-verified ✅
-- 4 tabBar icons (81x81 PNG) ✅
-- `app.wxml` root template ✅
-- `app.json` tabBar configuration ✅
-- 3 cloud functions with health check endpoints ✅
-- README with full project docs ✅
-- `sitemap.xml` for SEO ✅
-- GitHub Pages H5 landing (auto-deploys on push) ✅
+**预期结果**:
+```
+① ✅ HTTP 200 — claude-api 正常
+② ✅ HTTP 200 — image-api 正常
+③ ✅ HTTP 200 — video-api 正常
+```
 
 ---
 
-## Questions?
+## 已知占位符（需替换）
 
-Check the [README.md](README.md) for project structure and tech details.
+| 文件 | 行号 | 当前值 | 替换为 |
+|------|------|--------|--------|
+| `project.config.json` | 45 | `""` | `wx真实AppID` |
+| `h5/index.html` | 343 | `https://wxaurl.com/` | 微信短链 URL Link |
+| `app.js` | 20 | `YOUR_ANTHROPIC_KEY` | `sk-ant-...` |
+| `app.js` | 23 | `YOUR_OPENAI_KEY` | `sk-proj-...` |
+| `app.js` | 24 | `YOUR_REPLICATE_KEY` | `r8_...` |
+
+---
+
+## 代码验证（19/19 通过）
+
+```bash
+find pages services utils cloud-functions -name "*.js" | xargs node --check
+# Result: 19/19 PASS ✅
+```
+
+---
+
+## 阻塞项
+
+| 阻塞项 | Owner | 状态 |
+|--------|-------|------|
+| WeChat AppID | CEO | ⏳ 等待 |
+| API 密钥 | CEO | ⏳ 等待 |
+| 云函数部署 | CEO（WeChat DevTools） | ⏳ 等待 |
+| H5 部署 | CEO | ⏳ 等待 |
+| 小程序上传 | CEO | ⏳ 等待 |

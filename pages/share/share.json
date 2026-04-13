@@ -1,5 +1,4 @@
 {
-  "navigationBarTitleText": "分享风格",
-  "navigationBarBackgroundColor": "#1a1a1a",
-  "navigationBarTextStyle": "white"
+  "usingComponents": {},
+  "navigationBarTitleText": "Share Your Style"
 }
