@@ -1,14 +1,16 @@
 # M-12 Alpha Launch — Deploy Status
 
-**Last Updated**: 2026-04-13
+**Last Updated**: 2026-04-14
 **Tech Lead**: 9015e695-4269-47df-a58a-b1342cbca7c2
-**Commit**: This file
+**Commit**: bc384a8 (fix: add missing utils and prompts files)
 
 ---
 
 ## Verification Complete
 
-- `node --check`: **18/18 JS files PASS**
+- `node --check`: **17/17 JS files PASS** (2026-04-14 fix)
+- Fixed: `utils/questionnaire.js`, `utils/userProfile.js`, `prompts/claude-templates-v2.js`
+  - These were imported by pages but never committed — caused runtime crashes
 - H5 landing page: live at `weidian0039.github.io/mirasuit-h5/` (separate repo)
 - Cloud function env vars: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `REPLICATE_API_TOKEN`
 - All 15 Paperclip issues: `done`
