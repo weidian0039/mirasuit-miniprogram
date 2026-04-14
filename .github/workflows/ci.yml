@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Syntax check all JS files
+        run: |
+          ERROR_COUNT=0
+          for f in $(find . -name "*.js" -not -path "./node_modules/*" -not -path "./.github/*"); do
+            node --check "$f" 2>/dev/null || { echo "FAIL: $f"; ERROR_COUNT=$((ERROR_COUNT+1)); }
+          done
+          if [ $ERROR_COUNT -eq 0 ]; then
+            echo "✅ All JS files pass syntax check"
+          else
+            echo "❌ $ERROR_COUNT file(s) failed"
+            exit 1
+          fi
+
+      - name: Check project.config.json has AppID
+        run: |
+          APPID=$(python3 -c "import json,sys; d=json.load(open('project.config.json')); print(d.get('appid',''))" 2>/dev/null || echo "")
+          if [ "$APPID" = "" ] || [ "$APPID" = "YOUR_WECHAT_APP_ID" ]; then
+            echo "⚠️  AppID not set in project.config.json (expected for shared code)"
+          else
+            echo "✅ AppID configured: $APPID"
+          fi
+
+      - name: Check cloud functions present
+        run: |
+          for cf in mirasuit-claude-api mirasuit-image-api mirasuit-video-api; do
+            if [ -d "cloud-functions/$cf" ]; then
+              echo "✅ cloud-functions/$cf present"
+            else
+              echo "❌ cloud-functions/$cf missing"
+              exit 1
+            fi
+          done
+
+      - name: Check H5 landing page
+        run: |
+          if [ -f "h5/index.html" ]; then
+            echo "✅ h5/index.html present ($(wc -c < h5/index.html) bytes)"
+          else
+            echo "❌ h5/index.html missing"
+            exit 1
+          fi

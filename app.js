@@ -9,7 +9,7 @@ App({
     // API keys loaded from env (set via cloud function config)
     anthropicKey: process.env.ANTHROPIC_API_KEY || '',
     openaiKey: process.env.OPENAI_API_KEY || '',
-    replicateToken: process.env.REPLICATE_API_TOKEN || '',
+    replicateKey: process.env.REPLICATE_API_KEY || '',
   },
 
   onLaunch() {

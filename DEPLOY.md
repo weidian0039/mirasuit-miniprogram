@@ -2,7 +2,7 @@
 
 **执行时间**: ~20 分钟
 **Tech Lead**: 9015e695-4269-47df-a58a-b1342cbca7c2
-**最后更新**: 2026-04-12
+**最后更新**: 2026-04-14
 
 ---
 
@@ -48,7 +48,7 @@ cd mirasuit-miniprogram
 |--------|-----|
 | `ANTHROPIC_API_KEY` | `sk-ant-...` |
 | `OPENAI_API_KEY` | `sk-proj-...` |
-| `REPLICATE_API_KEY` | `r8_...` |
+| `REPLICATE_API_KEY`   | `r8_...`  | ← exact name, all 3 cloud functions |
 
 ### Step 3 — 云函数部署（WeChat DevTools）
 
@@ -116,7 +116,7 @@ const wechatSearchUrl = `https://wxaurl.com/`;
 | `h5/index.html` | 343 | `https://wxaurl.com/` | 微信短链 URL Link |
 | `app.js` | 20 | `YOUR_ANTHROPIC_KEY` | `sk-ant-...` |
 | `app.js` | 23 | `YOUR_OPENAI_KEY` | `sk-proj-...` |
-| `app.js` | 24 | `YOUR_REPLICATE_KEY` | `r8_...` |
+| `app.js` | 12 | `REPLICATE_API_KEY` | `r8_...` |
 
 ---
 
@@ -129,12 +129,26 @@ find pages services utils cloud-functions -name "*.js" | xargs node --check
 
 ---
 
+## CI 自动验证
+
+每次 push/PR 自动检查：
+- ✅ JS 语法（所有 .js 文件 `node --check`）
+- ✅ project.config.json AppID 配置
+- ✅ 3 个 cloud function 目录存在
+- ✅ h5/index.html 存在
+
+CI 配置：`.github/workflows/ci.yml`
+
+---
+
 ## 阻塞项
 
 | 阻塞项 | Owner | 状态 |
 |--------|-------|------|
-| WeChat AppID | CEO | ⏳ 等待 |
-| API 密钥 | CEO | ⏳ 等待 |
-| 云函数部署 | CEO（WeChat DevTools） | ⏳ 等待 |
-| H5 部署 | CEO | ⏳ 等待 |
-| 小程序上传 | CEO | ⏳ 等待 |
+| WeChat AppID | 用户 | ⏳ 等待 |
+| API 密钥 | 用户 | ⏳ 等待 |
+| 云函数部署 | CEO（WeChat DevTools） | ⏳ 等待凭证 |
+| H5 部署 | CEO | ⏳ 等待凭证 |
+| 小程序上传 | CEO | ⏳ 等待凭证 |
+
+> **用户操作项**：提供 4 个凭证 → 注册 mp.weixin.qq.com → 下载 WeChat DevTools → 打开本项目上传
