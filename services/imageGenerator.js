@@ -169,6 +169,11 @@ class ImageGenerator {
         throw new Error(cloudData?.message || `Cloud function error: ${cloudData?.error}`);
       }
 
+      // FLUX async fallback: poll until prediction succeeds
+      if (cloudData.data?.status === 'pending' && cloudData.data?.predictionId) {
+        return await this._pollImagePredictionStatus(cloudData.data.predictionId);
+      }
+
       return { url: cloudData.data.url };
     }
 
@@ -288,6 +293,53 @@ class ImageGenerator {
     }
 
     throw new Error('Replicate prediction timed out');
+  }
+
+  /**
+   * Poll cloud function for FLUX image prediction status.
+   * Used when DALL-E fails and FLUX async fallback is triggered.
+   * @private
+   */
+  async _pollImagePredictionStatus(predictionId) {
+    const maxAttempts = 30;
+    const pollInterval = 2000;
+
+    for (let i = 0; i < maxAttempts; i++) {
+      await this._sleep(pollInterval);
+
+      const result = await wx.cloud.callFunction({
+        name: this.config.cloudFunctionName,
+        data: {
+          action: 'getPredictionStatus',
+          data: { predictionId }
+        }
+      });
+
+      if (result.errMsg && !result.errMsg.includes('ok')) {
+        logger.warn('getPredictionStatus call failed', { attempt: i + 1, err: result.errMsg });
+        continue;
+      }
+
+      const cloudData = result.result;
+
+      if (!cloudData?.success) {
+        logger.warn('getPredictionStatus returned error', { attempt: i + 1, error: cloudData?.message });
+        continue;
+      }
+
+      if (cloudData.status === 'succeeded') {
+        return { url: cloudData.data?.url };
+      }
+
+      if (cloudData.status === 'failed') {
+        throw new Error('FLUX image generation failed: ' + (cloudData.message || 'unknown'));
+      }
+
+      // still processing — continue polling
+      logger.debug('FLUX prediction polling', { attempt: i + 1, status: cloudData.status });
+    }
+
+    throw new Error('FLUX image generation timed out after 60 seconds');
   }
 
   /**

@@ -210,6 +210,9 @@ exports.main = async (event, context) => {
       case 'generateStyleImage':
         return await handleGenerateStyleImage(data, openid);
 
+      case 'getPredictionStatus':
+        return await handleGetPredictionStatus(data);
+
       default:
         return { success: false, error: 'UNKNOWN_ACTION', message: `未知的 action: ${action}` };
     }
@@ -263,4 +266,72 @@ async function handleGenerateStyleImage(data, openid) {
   await setCache(prompt, result);
 
   return { success: true, data: result, cached: false };
+}
+
+/**
+ * 轮询 Replicate prediction 状态（FLUX 异步返回）
+ */
+async function getPredictionResult(apiKey, predictionId) {
+  const response = await axios.get(
+    `https://api.replicate.com/v1/predictions/${predictionId}`,
+    {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`
+      },
+      timeout: 60000
+    }
+  );
+  return response.data;
+}
+
+/**
+ * 查询 FLUX 图片生成状态
+ */
+async function handleGetPredictionStatus(data) {
+  const { predictionId } = data;
+
+  if (!predictionId) {
+    return { success: false, error: 'MISSING_PREDICTION_ID', message: 'predictionId 不能为空' };
+  }
+
+  const apiKey = process.env.REPLICATE_API_KEY;
+  if (!apiKey) {
+    return { success: false, error: 'REPLICATE_API_KEY_NOT_CONFIGURED', message: 'REPLICATE_API_KEY 环境变量未配置' };
+  }
+
+  try {
+    const prediction = await getPredictionResult(apiKey, predictionId);
+
+    if (prediction.status === 'succeeded') {
+      const output = Array.isArray(prediction.output) ? prediction.output[0] : prediction.output;
+      return {
+        success: true,
+        status: 'succeeded',
+        data: { url: output },
+        cached: false
+      };
+    } else if (prediction.status === 'failed') {
+      return {
+        success: false,
+        status: 'failed',
+        error: 'FLUX_PREDICTION_FAILED',
+        message: prediction.error || '图片生成失败'
+      };
+    } else {
+      // 'starting' or 'processing'
+      return {
+        success: true,
+        status: prediction.status,
+        data: { status: prediction.status },
+        cached: false
+      };
+    }
+  } catch (err) {
+    console.error('[ImageAPI] getPredictionStatus error:', err.message);
+    return {
+      success: false,
+      error: 'POLLING_ERROR',
+      message: err.message || '查询生成状态失败'
+    };
+  }
 }
