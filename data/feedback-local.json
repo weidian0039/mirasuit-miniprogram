@@ -1,0 +1,10 @@
+[
+  { "id": "fb_001", "rating": 5, "comment": "推荐很准确，符合我的风格", "stage": "results", "contact": "", "mbti": "INTJ", "timestamp": 1712500000000, "version": "Pre-Alpha" },
+  { "id": "fb_002", "rating": 4, "comment": "问卷有点长，但结果值得", "stage": "questionnaire", "contact": "", "mbti": "ENFP", "timestamp": 1712500100000, "version": "Pre-Alpha" },
+  { "id": "fb_003", "rating": 3, "comment": "", "stage": "results", "contact": "", "mbti": "ISTP", "timestamp": 1712500200000, "version": "Pre-Alpha" },
+  { "id": "fb_004", "rating": 5, "comment": "图片生成效果很好", "stage": "share", "contact": "小明", "mbti": "ENTJ", "timestamp": 1712500300000, "version": "Pre-Alpha" },
+  { "id": "fb_005", "rating": 2, "comment": "问卷太复杂了，题目太多", "stage": "questionnaire", "contact": "", "mbti": "ESFJ", "timestamp": 1712500400000, "version": "Pre-Alpha" },
+  { "id": "fb_006", "rating": 4, "comment": "结果比较满意，会推荐给朋友", "stage": "results", "contact": "", "mbti": "INFP", "timestamp": 1712500500000, "version": "Pre-Alpha" },
+  { "id": "fb_007", "rating": 1, "comment": "推荐完全不准，不适合我", "stage": "results", "contact": "", "mbti": "ESTP", "timestamp": 1712500600000, "version": "Pre-Alpha" },
+  { "id": "fb_008", "rating": 4, "comment": "界面设计简约好看", "stage": "general", "contact": "", "mbti": "INTJ", "timestamp": 1712500700000, "version": "Pre-Alpha" }
+]
