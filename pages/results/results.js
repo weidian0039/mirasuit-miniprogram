@@ -45,7 +45,7 @@ Page({
     try {
       const Analytics = require('../../services/analytics');
       const analytics = new Analytics({ useCloudFunction: true });
-      this._trackAPI(service, success, latencyMs, errorType);
+      analytics.trackAPI(service, success, latencyMs, errorType);
     } catch (e) {
       // Analytics failure must not block API calls
     }
