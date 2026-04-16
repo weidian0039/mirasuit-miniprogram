@@ -5,8 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="description" content="Discover your MIRASUIT style profile — personalized menswear recommendations powered by MBTI and personality analysis.">
   <title>MIRASUIT — Your Style Identity</title>
+
+  <!-- Open Graph / Social sharing -->
+  <meta property="og:title" content="MIRASUIT — Your Style Identity">
+  <meta property="og:description" content="Personalized menswear recommendations based on your personality. No account required.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://weidian0039.github.io/mirasuit-h5/og-image.png">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MIRASUIT — Your Style Identity">
+  <meta name="twitter:description" content="Personalized menswear recommendations based on your personality.">
+
   <!-- Cloudflare Web Analytics - privacy-friendly, no cookies -->
-  <!-- See M-14-ANALYTICS.md for setup instructions -->
+  <!-- Replace REPLACE_WITH_YOUR_CLOUDFLARE_ANALYTICS_TOKEN with real token from cloudflare.com/analytics -->
   <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "REPLACE_WITH_YOUR_CLOUDFLARE_ANALYTICS_TOKEN"}'></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -275,8 +286,15 @@
         Your data stays on your device — no account required.
       </div>
 
-      <div class="qr-section">
+            <div class="qr-section">
         <div class="qr-placeholder">
+          <canvas id="qr-canvas" width="160" height="160" style="display:none;"></canvas>
+          <img id="qr-image" src="" alt="MIRASUIT QR Code" style="display:none; width:160px; height:160px; border-radius:4px;">
+          <div class="qr-icon" id="qr-fallback-icon">⊞</div>
+          <div class="qr-label" id="qr-fallback-label">QR Code</div>
+        </div>
+        <div class="qr-note">Scan with WeChat to open MIRASUIT</div>
+      </div>qr-placeholder">
           <div class="qr-icon">⊞</div>
           <div class="qr-label">QR Code</div>
         </div>
@@ -395,7 +413,7 @@
           copyBtn.textContent = 'Link copied!';
           setTimeout(function() { copyBtn.textContent = 'Copy Mini Program Link'; }, 2000);
         }).catch(function() {
-          // Fallback
+          // Fallback for browsers without clipboard API
           var ta = document.createElement('textarea');
           ta.value = link;
           document.body.appendChild(ta);
@@ -406,6 +424,33 @@
           setTimeout(function() { copyBtn.textContent = 'Copy Mini Program Link'; }, 2000);
         });
       });
+
+      // Generate QR code for mini program deep link (no library needed — uses Google Charts)
+      (function generateQR() {
+        if (!WECHAT_APP_ID) return;
+
+        var qrData = wechatSearchUrl && wechatSearchUrl !== 'https://wxaurl.com/'
+          ? wechatSearchUrl
+          : (wechatUrl || window.location.href);
+
+        var qrUrl = 'https://chart.googleapis.com/chart?cht=qr&chs=160x160&chl='
+          + encodeURIComponent(qrData) + '&choe=UTF-8';
+
+        var qrImage = document.getElementById('qr-image');
+        var qrFallbackIcon = document.getElementById('qr-fallback-icon');
+        var qrFallbackLabel = document.getElementById('qr-fallback-label');
+
+        qrImage.src = qrUrl;
+        qrImage.onload = function() {
+          qrImage.style.display = 'block';
+          if (qrFallbackIcon) qrFallbackIcon.style.display = 'none';
+          if (qrFallbackLabel) qrFallbackLabel.style.display = 'none';
+        };
+        qrImage.onerror = function() {
+          // Google Charts unavailable — show fallback icon, log warning
+          console.warn('[MIRASUIT H5] QR code generation failed — Google Charts API unavailable');
+        };
+      })();
     })();
   </script>
 </body>
