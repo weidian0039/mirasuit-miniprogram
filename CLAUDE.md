@@ -20,6 +20,11 @@
 ├── verify.sh                      ← Cloud function health check (M-16 ready)
 ├── deploy.sh                      ← AppID config + deploy checklist
 ├── preflight-check.sh             ← Pre-deploy environment check
+├── scripts/
+│   ├── analyze-feedback.js        ← M-17 feedback analysis (table + JSON output)
+│   └── README.md                  ← Scripts documentation
+├── data/
+│   └── feedback-local.json         ← Sample data for M-17 script testing
 └── project.config.json            ← CEO fills in appid
 ```
 
@@ -27,13 +32,14 @@
 
 | Date | Commit | Summary |
 |------|--------|---------|
-| 2026-04-14 | `ea89adc` | docs: update M-12 deploy status |
-| 2026-04-14 | `bc384a8` | fix: add missing utils + prompts (530 lines) |
-| 2026-04-14 | `83916b6` | feat: add verify.sh cloud function health check |
-| 2026-04-14 | `fd3dff9` | fix: remove unnecessary npm install from CI |
-| 2026-04-14 | `02fa455` | feat: add CI, deploy.sh, fix REPLICATE variable naming |
-| 2026-04-13 | `ac6c619` | feat: add Cloudflare Web Analytics snippet to H5 |
-| 2026-04-13 | `25b541d` | feat: Sprint 4 complete — M-11 through M-15 merged |
+| 2026-04-17 | `fb02767` | fix: M-12-DEPLOY-STATUS.md — REPLICATE_API_TOKEN→KEY (critical) |
+| 2026-04-17 | `5d0ef9d` | docs: scripts/README.md — tooling + M-17 usage |
+| 2026-04-17 | `f10ff4b` | fix: share page — M-15 lazy Analytics (consistent) |
+| 2026-04-16 | `6607111` | fix: results page _trackAPI infinite recursion (critical) |
+| 2026-04-16 | `ed65cb5` | feat: Sprint 5 plan + M-17 feedback analysis script |
+| 2026-04-16 | `6a7477d` | feat: branded OG image PNG (mirasuit-h5) |
+| 2026-04-14 | `4fb8c7e` | fix: image CF FLUX polling — getPredictionStatus action |
+| 2026-04-14 | `25d64b1` | fix: H5 QR code + OG tags + script structure |
 
 ## Deploy Scripts (Available)
 
@@ -47,6 +53,8 @@
 # 3. Post-deploy verification (run after cloud functions deployed)
 ./verify.sh <WECHAT_CLOUD_ENV_ID>
 ```
+
+See `scripts/README.md` for M-17 feedback analysis usage.
 
 ## M-12 CEO Deploy Operations (P0 — 4 items)
 
@@ -80,18 +88,18 @@ REPLICATE_API_KEY  → mirasuit-image-api + mirasuit-video-api
 
 ## Code Verification
 
-- `node --check`: All 21 JS files in `~/mirasuit-miniprogram/` pass
+- `node --check`: All 22 JS files pass (2026-04-17)
 - `bash -n *.sh`: All 3 shell scripts pass
-- `git log --oneline`: 12 commits on main, all pushed
+- `git log --oneline`: 26 commits on main, all pushed
 
 ## Sprint 5 Triggers
 
-| Issue | Title | Trigger |
-|-------|-------|---------|
-| M-16 | Post-Deploy Verification | `verify.sh` returns all ✅ |
-| M-17 | Alpha Feedback Analysis | 5-10 alpha users tested |
-| M-18 | Bug Fixes | M-17 findings |
-| M-19 | Beta Launch Prep | M-18 fixes |
+| Issue | Title | Status |
+|-------|-------|--------|
+| M-16 | Post-Deploy Verification | blocked on M-12 CEO deploy |
+| M-17 | Alpha Feedback Analysis | blocked on M-16 |
+| M-18 | Bug Fixes | in_progress — 4 fixes done pre-audit |
+| M-19 | Beta Launch Prep | blocked on M-18 |
 
 ## Brand Voice
 
