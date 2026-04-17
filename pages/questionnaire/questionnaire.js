@@ -40,10 +40,15 @@ Page({
     this.qm.loadFromStorage();
     this._answerCount = 0; // M-15: batch storage saves
 
-    // Track funnel: questionnaire_start (only if no prior answers)
+    // Track funnel: questionnaire_start (only on genuine first start, not resume)
     const existingResponses = this.qm.getResponses();
     const answeredCount = Object.keys(existingResponses).length;
-    this._trackFunnel('questionnaire_start', { resumedAnswers: answeredCount });
+    if (answeredCount === 0) {
+      this._trackFunnel('questionnaire_start', {});
+    } else {
+      // Resume: track separately so M-17 funnel analysis can distinguish
+      this._trackFunnel('questionnaire_resume', { answeredCount });
+    }
 
     // Load existing responses if any
     this.setData({

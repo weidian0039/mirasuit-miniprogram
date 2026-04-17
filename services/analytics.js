@@ -180,12 +180,13 @@ class Analytics {
       const counts = {
         home_view: 0,
         questionnaire_start: 0,
+        questionnaire_resume: 0,
         questionnaire_complete: 0,
         results_view: 0,
         share_view: 0,
       };
 
-      const stageOrder = ['home_view', 'questionnaire_start', 'questionnaire_complete', 'results_view', 'share_view'];
+      const stageOrder = ['home_view', 'questionnaire_start', 'questionnaire_resume', 'questionnaire_complete', 'results_view', 'share_view'];
 
       events.forEach(e => {
         if (e.category === 'funnel' && counts.hasOwnProperty(e.name)) {
