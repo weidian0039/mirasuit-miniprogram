@@ -1,9 +1,8 @@
 // pages/share/share.js
 // M-10: Social Sharing Page — generates brand-aligned share cards
+// M-15 Performance: Analytics lazy-loaded — not on module load critical path
 const UserProfileManager = require('../../utils/userProfile');
 const logger = require('../../services/logger');
-const Analytics = require('../../services/analytics');
-const analytics = new Analytics({ useCloudFunction: true });
 
 Page({
   data: {
@@ -22,7 +21,7 @@ Page({
 
   onLoad(options) {
     logger.userAction('page-load', { page: 'share' });
-    analytics.trackFunnel('share_view'); // M-14 funnel tracking
+    this._trackFunnelLazy(); // M-15: lazy analytics — not on critical path
     this.loadProfile();
 
     // Handle deep link query params
@@ -34,6 +33,17 @@ Page({
   onShow() {
     // Refresh profile data in case it changed
     this.loadProfile();
+  },
+
+  // M-15: Lazy analytics — require + instantiate only when needed (non-blocking)
+  _trackFunnelLazy() {
+    try {
+      const Analytics = require('../../services/analytics');
+      const analytics = new Analytics({ useCloudFunction: true });
+      analytics.trackFunnel('share_view');
+    } catch (e) {
+      // Analytics failure must not block page render
+    }
   },
 
   loadProfile() {
