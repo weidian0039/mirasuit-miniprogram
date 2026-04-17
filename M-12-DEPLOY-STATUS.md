@@ -1,18 +1,19 @@
 # M-12 Alpha Launch — Deploy Status
 
-**Last Updated**: 2026-04-14
+**Last Updated**: 2026-04-17
 **Tech Lead**: 9015e695-4269-47df-a58a-b1342cbca7c2
-**Commit**: bc384a8 (fix: add missing utils and prompts files)
+**Commit**: 5d0ef9d (current HEAD)
+**M-18 fixes**: FLUX polling (4fb8c7e), _trackAPI recursion (6607111), share lazy Analytics (f10ff4b)
 
 ---
 
 ## Verification Complete
 
-- `node --check`: **17/17 JS files PASS** (2026-04-14 fix)
+- `node --check`: **22/22 JS files PASS** (2026-04-17)
 - Fixed: `utils/questionnaire.js`, `utils/userProfile.js`, `prompts/claude-templates-v2.js`
   - These were imported by pages but never committed — caused runtime crashes
 - H5 landing page: live at `weidian0039.github.io/mirasuit-h5/` (separate repo)
-- Cloud function env vars: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `REPLICATE_API_TOKEN`
+- Cloud function env vars: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `REPLICATE_API_KEY`
 - All 15 Paperclip issues: `done`
 
 ---
@@ -45,7 +46,7 @@ In [WeChat Cloud Console](https://cloud.weixin.qq.com/):
    ```
    ANTHROPIC_API_KEY=sk-ant-...
    OPENAI_API_KEY=sk-...
-   REPLICATE_API_TOKEN=r8_...
+   REPLICATE_API_KEY=r8_...
    ```
 
 #### 4. Verify `useCloudFunction: true` in Code (already done)
@@ -58,7 +59,7 @@ Results page already uses cloud functions. No code changes needed.
 
 #### `h5/index.html` — Replace stub short link
 
-Line ~343: Replace `wechatSearchUrl: 'https://wxaurl.com/'` with your WeChat URL scheme or short link.
+Line ~367: Replace `wechatSearchUrl: 'https://wxaurl.com/'` with your WeChat URL scheme or short link.
 
 ---
 
@@ -96,6 +97,11 @@ https://weidian0039.github.io/mirasuit-h5/?appid=YOUR_WECHAT_APP_ID&mbti=INTJ
 
 ### New H5
 - `h5/index.html` — Landing page with appid URL param injection
+- `h5/og-image.png` — Branded 1200×630 social sharing image
+
+### New Scripts (M-17 / Sprint 5)
+- `scripts/analyze-feedback.js` — Feedback analysis (rating dist, themes, MBTI, recommendations)
+- `scripts/README.md` — Tooling documentation
 
 ---
 
