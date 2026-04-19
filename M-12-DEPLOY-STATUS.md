@@ -2,7 +2,7 @@
 
 **Last Updated**: 2026-04-18
 **Tech Lead**: 9015e695-4269-47df-a58a-b1342cbca7c2
-**Commit**: 7938b56 (current HEAD)
+**Commit**: 7938b56 (code HEAD — docs updated to a8259d5)
 **M-18 fixes**: FLUX polling (4fb8c7e), _trackAPI recursion (6607111), share lazy Analytics (f10ff4b), questionnaire funnel (a94616e), REPLICATE key docs ×2 (fb02767, 7938b56)
 
 ---
