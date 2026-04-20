@@ -22,6 +22,19 @@
 
 ### P0 — Must Do (blocks submission)
 
+#### 0. (Optional) Install Deploy Watchdog — Automated M-16 Trigger
+Once you run `./deploy.sh`, the watchdog script detects it and prints next steps automatically.
+
+```bash
+# Copy into your ~/bin:
+cp scripts/mirasuit-deploy-watchdog.sh ~/bin/
+chmod +x ~/bin/mirasuit-deploy-watchdog.sh
+
+# Add to crontab (fires every 10 min, silent until deploy detected):
+crontab -e
+# Add: */10 * * * * ~/bin/mirasuit-deploy-watchdog.sh >> ~/mirasuit-deploy.log 2>&1
+```
+
 #### 1. `project.config.json` — Fill in WeChat AppID
 ```json
 "appid": "wx...",  // ← Replace YOUR_WECHAT_APP_ID with your real AppID

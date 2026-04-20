@@ -65,6 +65,21 @@ Pre-deploy prerequisites checklist.
 ./preflight-check.sh
 ```
 
+### mirasuit-deploy-watchdog.sh
+Automated M-16 trigger. Checks every 10 min if `project.config.json` appid is configured.
+When CEO runs `./deploy.sh <APPID>`, this script detects it and prints next steps.
+
+```bash
+# Install: add to crontab
+crontab -e
+# Add line:
+*/10 * * * * ~/bin/mirasuit-deploy-watchdog.sh >> ~/mirasuit-deploy.log 2>&1
+
+# Or copy into project:
+cp scripts/mirasuit-deploy-watchdog.sh ~/bin/
+chmod +x ~/bin/mirasuit-deploy-watchdog.sh
+```
+
 ---
 
 ## Env Var Naming
