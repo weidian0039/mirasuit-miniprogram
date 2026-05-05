@@ -1,15 +1,15 @@
 # M-12 Alpha Launch — Deploy Status
 
-**Last Updated**: 2026-04-18
+**Last Updated**: 2026-04-20
 **Tech Lead**: 9015e695-4269-47df-a58a-b1342cbca7c2
-**Commit**: 7938b56 (code HEAD — docs updated to a8259d5)
+**Commit**: fca9dc8 (HEAD — code + docs in sync)
 **M-18 fixes**: FLUX polling (4fb8c7e), _trackAPI recursion (6607111), share lazy Analytics (f10ff4b), questionnaire funnel (a94616e), REPLICATE key docs ×2 (fb02767, 7938b56)
 
 ---
 
 ## Verification Complete
 
-- `node --check`: **22/22 JS files PASS** (2026-04-18)
+- `node --check`: **22/22 JS files PASS** (2026-04-20)
 - Fixed: `utils/questionnaire.js`, `utils/userProfile.js`, `prompts/claude-templates-v2.js`
   - These were imported by pages but never committed — caused runtime crashes
 - H5 landing page: live at `weidian0039.github.io/mirasuit-h5/` (separate repo)
