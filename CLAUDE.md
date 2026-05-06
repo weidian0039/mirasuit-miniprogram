@@ -88,9 +88,9 @@ REPLICATE_API_KEY  → mirasuit-image-api + mirasuit-video-api
 
 ## Code Verification
 
-- `node --check`: All 22 JS files pass (2026-04-17)
+- `node --check`: All 22 JS files pass (2026-04-20)
 - `bash -n *.sh`: All 3 shell scripts pass
-- `git log --oneline`: 26 commits on main, all pushed
+- `git log --oneline`: 31 commits on main, all pushed
 
 ## Sprint 5 Triggers
 
@@ -98,7 +98,7 @@ REPLICATE_API_KEY  → mirasuit-image-api + mirasuit-video-api
 |-------|-------|--------|
 | M-16 | Post-Deploy Verification | blocked on M-12 CEO deploy |
 | M-17 | Alpha Feedback Analysis | blocked on M-16 |
-| M-18 | Bug Fixes | in_progress — 4 fixes done pre-audit |
+| M-18 | Bug Fixes | done — 6 fixes pre-committed (FLUX polling, _trackAPI recursion, share lazy Analytics, questionnaire funnel, REPLICATE key docs ×2) |
 | M-19 | Beta Launch Prep | blocked on M-18 |
 
 ## Brand Voice
